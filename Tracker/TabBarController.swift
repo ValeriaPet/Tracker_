@@ -28,7 +28,7 @@ class TabBarController: UIViewController {
         setupDatePicker()
     }
     
-    
+
     func setupNavigationBar() {
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addTapped))
         self.navigationItem.title = "Трекеры"

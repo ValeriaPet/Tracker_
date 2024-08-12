@@ -15,6 +15,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window?.makeKeyAndVisible()
     }
     
+    
     func sceneDidDisconnect(_ scene: UIScene) {}
     
     func sceneDidBecomeActive(_ scene: UIScene) {}
