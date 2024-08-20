@@ -17,7 +17,7 @@ class TabBarController: UIViewController {
         self.view.backgroundColor = .white
 
         setupNavigationBar()
-        setupPlusButton() // Setup PlusButton before Label
+        setupPlusButton()
         setupLabel()
         setupSearchBar()
         setupIcon()
@@ -53,8 +53,11 @@ class TabBarController: UIViewController {
         ])
     }
     @objc func plusButtonAction() {
-        print("Нажата кнопка +")
+        let createTrackerVC = CreateTrackerViewController()
+        createTrackerVC.modalPresentationStyle = .pageSheet // Можно использовать .overFullScreen для прозрачного фона
+        present(createTrackerVC, animated: true, completion: nil)
     }
+
 
     func setupLabel() {
         let label = UILabel()
@@ -150,12 +153,12 @@ class TabBarController: UIViewController {
         view.addSubview(tabBar)
         self.tabBar = tabBar
 
-        // Set up constraints for the TabBar
+
         NSLayoutConstraint.activate([
             tabBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tabBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tabBar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            tabBar.heightAnchor.constraint(equalToConstant: 84) // Set height as needed
+            tabBar.heightAnchor.constraint(equalToConstant: 84)
         ])
     }
 
