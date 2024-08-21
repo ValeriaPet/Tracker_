@@ -2,15 +2,14 @@
 import Foundation
 import UIKit
 
-class CreateTrackerViewController: UIViewController {
-
+class TypeSelectionViewController: UIViewController {
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
         view.backgroundColor = .white
         setupUI()
     }
-
+    
     func setupUI() {
         // Заголовок
         let titleLabel = UILabel()
@@ -19,7 +18,7 @@ class CreateTrackerViewController: UIViewController {
         titleLabel.textAlignment = .center
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(titleLabel)
-
+        
         // Кнопка "Привычка"
         let habitButton = UIButton(type: .system)
         habitButton.setTitle("Привычка", for: .normal)
@@ -30,7 +29,7 @@ class CreateTrackerViewController: UIViewController {
         habitButton.translatesAutoresizingMaskIntoConstraints = false
         habitButton.addTarget(self, action: #selector(habitButtonTapped), for: .touchUpInside)
         view.addSubview(habitButton)
-
+        
         // Кнопка "Нерегулярное событие"
         let eventButton = UIButton(type: .system)
         eventButton.setTitle("Нерегулярное событие", for: .normal)
@@ -41,33 +40,32 @@ class CreateTrackerViewController: UIViewController {
         eventButton.translatesAutoresizingMaskIntoConstraints = false
         eventButton.addTarget(self, action: #selector(eventButtonTapped), for: .touchUpInside)
         view.addSubview(eventButton)
-
+        
         // Layout
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 27),
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-
+            
             habitButton.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 295),
             habitButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             habitButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             habitButton.heightAnchor.constraint(equalToConstant: 60),
-
+            
             eventButton.topAnchor.constraint(equalTo: habitButton.bottomAnchor, constant: 16),
             eventButton.leadingAnchor.constraint(equalTo: habitButton.leadingAnchor),
             eventButton.trailingAnchor.constraint(equalTo: habitButton.trailingAnchor),
             eventButton.heightAnchor.constraint(equalToConstant: 60)
         ])
     }
-
+    
     @objc func habitButtonTapped() {
-        let createHabitVC = CreateHabitViewController()
+        let createHabitVC = HabitViewController()
         createHabitVC.modalPresentationStyle = .pageSheet
         present(createHabitVC, animated: true, completion: nil)
     }
-
-
+    
+    
     @objc func eventButtonTapped() {
-        print("Создать нерегулярное событие")
         let createEventVC = EventViewController()
         createEventVC.modalPresentationStyle = .pageSheet
         present(createEventVC, animated: true, completion: nil)

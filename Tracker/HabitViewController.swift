@@ -1,6 +1,6 @@
 import UIKit
 
-class CreateHabitViewController: UIViewController {
+class HabitViewController: UIViewController {
     
     let scheduleButton = UIButton(type: .system) // Переместил кнопку в глобальное пространство
     let categoryButton = UIButton(type: .system) // Добавляем кнопку "Категория"

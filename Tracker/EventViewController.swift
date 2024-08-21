@@ -22,18 +22,18 @@ class EventViewController: UIViewController {
         let nameTextField = UITextField()
         nameTextField.placeholder = "Введите название трекера"
         nameTextField.borderStyle = .none
-        nameTextField.backgroundColor = .systemGray6 // Предположим, это .backgroundDay
+        nameTextField.backgroundColor = .backgroundDay
         nameTextField.layer.cornerRadius = 16
         nameTextField.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(nameTextField)
         
         // Кнопка для выбора категории
         let categoryButton = UIButton(type: .roundedRect)
-        categoryButton.backgroundColor = .systemGray6 // Предположим, это .backgroundDay
+        categoryButton.backgroundColor = .backgroundDay
         categoryButton.setTitle("Категория", for: .normal)
         categoryButton.setTitleColor(.black, for: .normal)
         categoryButton.contentHorizontalAlignment = .left
-        categoryButton.titleEdgeInsets = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 0) // Отступ текста от левого края
+        categoryButton.titleEdgeInsets = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 0)
         categoryButton.layer.cornerRadius = 16
         categoryButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(categoryButton)
@@ -54,7 +54,7 @@ class EventViewController: UIViewController {
         cancelButton.translatesAutoresizingMaskIntoConstraints = false
         cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
         view.addSubview(cancelButton)
-
+        
         // Кнопка "Создать"
         let createButton = UIButton(type: .system)
         createButton.setTitle("Создать", for: .normal)
@@ -68,12 +68,12 @@ class EventViewController: UIViewController {
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-
+            
             nameTextField.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 24),
             nameTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             nameTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             nameTextField.heightAnchor.constraint(equalToConstant: 75),
-
+            
             categoryButton.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 24),
             categoryButton.leadingAnchor.constraint(equalTo: nameTextField.leadingAnchor),
             categoryButton.trailingAnchor.constraint(equalTo: nameTextField.trailingAnchor),
@@ -87,7 +87,7 @@ class EventViewController: UIViewController {
             cancelButton.widthAnchor.constraint(equalToConstant: 166),
             cancelButton.heightAnchor.constraint(equalToConstant: 60),
             cancelButton.trailingAnchor.constraint(equalTo: createButton.leadingAnchor, constant: -8),
-
+            
             createButton.trailingAnchor.constraint(equalTo: nameTextField.trailingAnchor),
             createButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -50),
             createButton.widthAnchor.constraint(equalToConstant: 161),
@@ -95,10 +95,15 @@ class EventViewController: UIViewController {
         ])
     }
     
+    @objc func categoryButtonTapped() {
+        // Здесь можно добавить логику для выбора категории
+        print("Категория выбрана")
+    }
+    
     @objc func cancelButtonTapped() {
         dismiss(animated: true, completion: nil)
     }
-
+    
     @objc func createButtonTapped() {
         print("Создание новой привычки")
         // Добавьте код для создания привычки
