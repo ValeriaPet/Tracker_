@@ -5,7 +5,7 @@ struct TrackerData {
         let calendar = Calendar.current
         let today = Date()
         
-        return [
+        var categories: [TrackerCategory] = [
             TrackerCategory(name: "Happy House", trackers: [
                 Tracker(id: UUID(),
                         title: "Поливать кактус",
@@ -37,5 +37,7 @@ struct TrackerData {
                         creationDate: calendar.date(byAdding: .day, value: -5, to: today)!)
             ])
         ]
+ 
+        return categories
     }
 }

@@ -2,6 +2,13 @@ import Foundation
 import UIKit
 
 class EventViewController: UIViewController {
+    
+    let categoryButton = UIButton(type: .system)
+    let nameTextField = UITextField()
+    
+    var onCreateTracker: ((TrackerCategory) -> Void)?
+    var selectedCategory: String = ""
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -19,7 +26,6 @@ class EventViewController: UIViewController {
         view.addSubview(titleLabel)
         
         // Поле для ввода названия
-        let nameTextField = UITextField()
         nameTextField.placeholder = "Введите название трекера"
         nameTextField.borderStyle = .none
         nameTextField.backgroundColor = .backgroundDay
@@ -28,7 +34,6 @@ class EventViewController: UIViewController {
         view.addSubview(nameTextField)
         
         // Кнопка для выбора категории
-        let categoryButton = UIButton(type: .roundedRect)
         categoryButton.backgroundColor = .backgroundDay
         categoryButton.setTitle("Категория", for: .normal)
         categoryButton.setTitleColor(.black, for: .normal)
@@ -36,6 +41,7 @@ class EventViewController: UIViewController {
         categoryButton.titleEdgeInsets = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 0)
         categoryButton.layer.cornerRadius = 16
         categoryButton.translatesAutoresizingMaskIntoConstraints = false
+        categoryButton.addTarget(self, action: #selector(categoryButtonTapped), for: .touchUpInside)
         view.addSubview(categoryButton)
         
         // Стрелка рядом с кнопкой "Категория"
@@ -96,8 +102,13 @@ class EventViewController: UIViewController {
     }
     
     @objc func categoryButtonTapped() {
-        // Здесь можно добавить логику для выбора категории
-        print("Категория выбрана")
+        let categorySelectionVC = CategorySelectionViewController()
+        categorySelectionVC.onCategorySelected = { [weak self] selectedCategory in
+            self?.selectedCategory = selectedCategory
+            self?.categoryButton.setTitle("Категория \(selectedCategory)", for: .normal)
+        }
+        categorySelectionVC.modalPresentationStyle = .pageSheet
+        present(categorySelectionVC, animated: true, completion: nil)
     }
     
     @objc func cancelButtonTapped() {
@@ -105,7 +116,26 @@ class EventViewController: UIViewController {
     }
     
     @objc func createButtonTapped() {
-        print("Создание новой привычки")
-        // Добавьте код для создания привычки
+        guard let name = nameTextField.text, !name.isEmpty else {
+            // Покажите сообщение о необходимости ввести название
+            return
+        }
+        
+        guard !selectedCategory.isEmpty else {
+            // Покажите сообщение о необходимости выбрать категорию
+            return
+        }
+        
+        let newTracker = Tracker(id: UUID(),
+                                 title: name,
+                                 color: .colorSelection10,
+                                 emoji: "🤡",
+                                 schedule: [], // Нерегулярные события не имеют расписания
+                                 creationDate: Date())
+        
+        let newCategory = TrackerCategory(name: selectedCategory, trackers: [newTracker])
+        
+        onCreateTracker?(newCategory)
+        dismiss(animated: true, completion: nil)
     }
 }

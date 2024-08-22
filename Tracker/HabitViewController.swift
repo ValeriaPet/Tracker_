@@ -2,18 +2,21 @@ import UIKit
 
 class HabitViewController: UIViewController {
     
-    let scheduleButton = UIButton(type: .system) // Переместил кнопку в глобальное пространство
-    let categoryButton = UIButton(type: .system) // Добавляем кнопку "Категория"
+    let scheduleButton = UIButton(type: .system)
+    let categoryButton = UIButton(type: .system)
+    let nameTextField = UITextField()
+    
+    var onCreateTracker: ((TrackerCategory) -> Void)?
+    var selectedSchedule: [Weekday] = []
+    var selectedCategory: String = "" // Дефолтная категория, можно изменить
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         view.backgroundColor = .white
         setupUI()
     }
     
     func setupUI() {
-        // Заголовок
         let titleLabel = UILabel()
         titleLabel.text = "Новая привычка"
         titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
@@ -21,8 +24,6 @@ class HabitViewController: UIViewController {
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(titleLabel)
         
-        // Поле для ввода названия
-        let nameTextField = UITextField()
         nameTextField.placeholder = "Введите название трекера"
         nameTextField.borderStyle = .none
         nameTextField.backgroundColor = .backgroundDay
@@ -40,12 +41,11 @@ class HabitViewController: UIViewController {
         categoryArrow.tintColor = .gray
         categoryArrow.translatesAutoresizingMaskIntoConstraints = false
         
-        // Кнопка для выбора категории
         categoryButton.backgroundColor = .none
-        categoryButton.setTitle("Категория", for: .normal)
+        categoryButton.setTitle("Категория: \(selectedCategory)", for: .normal)
         categoryButton.setTitleColor(.black, for: .normal)
         categoryButton.contentHorizontalAlignment = .left
-        categoryButton.titleEdgeInsets = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 0) // Отступ текста от левого края
+        categoryButton.titleEdgeInsets = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 0)
         categoryButton.layer.cornerRadius = 16
         categoryButton.translatesAutoresizingMaskIntoConstraints = false
         categoryButton.addTarget(self, action: #selector(categoryButtonTapped), for: .touchUpInside)
@@ -61,19 +61,17 @@ class HabitViewController: UIViewController {
         scheduleArrow.tintColor = .gray
         scheduleArrow.translatesAutoresizingMaskIntoConstraints = false
         
-        // Кнопка для выбора расписания
         scheduleButton.backgroundColor = .none
         scheduleButton.setTitle("Расписание", for: .normal)
         scheduleButton.setTitleColor(.black, for: .normal)
         scheduleButton.contentHorizontalAlignment = .left
-        scheduleButton.titleEdgeInsets = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 0) // Отступ текста от левого края
+        scheduleButton.titleEdgeInsets = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 0)
         scheduleButton.layer.cornerRadius = 16
         scheduleButton.translatesAutoresizingMaskIntoConstraints = false
         scheduleButton.addTarget(self, action: #selector(scheduleButtonTapped), for: .touchUpInside)
         container.addSubview(scheduleButton)
         container.addSubview(scheduleArrow)
         
-        // Кнопка "Отменить"
         let cancelButton = UIButton(type: .system)
         cancelButton.setTitle("Отменить", for: .normal)
         cancelButton.setTitleColor(.red, for: .normal)
@@ -84,7 +82,6 @@ class HabitViewController: UIViewController {
         cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
         view.addSubview(cancelButton)
         
-        // Кнопка "Создать"
         let createButton = UIButton(type: .system)
         createButton.setTitle("Создать", for: .normal)
         createButton.setTitleColor(.white, for: .normal)
@@ -94,7 +91,6 @@ class HabitViewController: UIViewController {
         createButton.addTarget(self, action: #selector(createButtonTapped), for: .touchUpInside)
         view.addSubview(createButton)
         
-        // Layout
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
@@ -144,8 +140,13 @@ class HabitViewController: UIViewController {
     }
     
     @objc func categoryButtonTapped() {
-        // Здесь можно добавить логику для выбора категории
-        print("Категория выбрана")
+        let categorySelectionVC = CategorySelectionViewController()
+        categorySelectionVC.onCategorySelected = { [weak self] selectedCategory in
+            self?.selectedCategory = selectedCategory
+            self?.categoryButton.setTitle("Категория \(selectedCategory)", for: .normal)
+        }
+        categorySelectionVC.modalPresentationStyle = .pageSheet
+        present(categorySelectionVC, animated: true, completion: nil)
     }
     
     @objc func scheduleButtonTapped() {
@@ -154,6 +155,9 @@ class HabitViewController: UIViewController {
         
         // Установка замыкания для получения выбранных дней
         scheduleVC.onDaysSelected = { [weak self] selectedShortDays in
+            self?.selectedSchedule = selectedShortDays.map { shortDay in
+                Weekday(rawValue: selectedShortDays.firstIndex(of: shortDay)!)!
+            }
             let daysText = selectedShortDays.joined(separator: ", ")
             self?.scheduleButton.setTitle("Расписание: \(daysText)", for: .normal)
         }
@@ -166,7 +170,21 @@ class HabitViewController: UIViewController {
     }
     
     @objc func createButtonTapped() {
-        print("Создание новой привычки")
-        // Добавьте код для создания привычки
+        guard let name = nameTextField.text, !name.isEmpty else {
+            // Покажите сообщение о необходимости ввести название
+            return
+        }
+        
+        let newTracker = Tracker(id: UUID(),
+                                 title: name,
+                                 color: .colorSelection13, // Цвет можно выбирать
+                                 emoji: "💀", // Эмодзи можно выбирать
+                                 schedule: selectedSchedule,
+                                 creationDate: Date())
+        
+        let newCategory = TrackerCategory(name: selectedCategory, trackers: [newTracker])
+        
+        onCreateTracker?(newCategory)
+        dismiss(animated: true, completion: nil)
     }
 }

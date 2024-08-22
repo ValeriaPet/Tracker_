@@ -1,4 +1,3 @@
-import Foundation
 import UIKit
 
 class TrackersViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, TrackerCollectionViewCellDelegate {
@@ -44,6 +43,9 @@ class TrackersViewController: UIViewController, UICollectionViewDataSource, UICo
     
     @objc private func addTapped() {
         let createTrackerVC = TypeSelectionViewController()
+        createTrackerVC.onCreateTracker = { [weak self] newCategory in
+            self?.addNewTrackerCategory(newCategory)
+        }
         createTrackerVC.modalPresentationStyle = .pageSheet
         present(createTrackerVC, animated: true, completion: nil)
     }
@@ -68,6 +70,9 @@ class TrackersViewController: UIViewController, UICollectionViewDataSource, UICo
     
     @objc private func plusButtonAction() {
         let createTrackerVC = TypeSelectionViewController()
+        createTrackerVC.onCreateTracker = { [weak self] newCategory in
+            self?.addNewTrackerCategory(newCategory)
+        }
         createTrackerVC.modalPresentationStyle = .pageSheet
         present(createTrackerVC, animated: true, completion: nil)
     }
@@ -163,7 +168,6 @@ class TrackersViewController: UIViewController, UICollectionViewDataSource, UICo
         collectionView.backgroundColor = .clear
         collectionView.register(TrackerCollectionViewCell.self, forCellWithReuseIdentifier: TrackerCollectionViewCell.reuseIdentifier)
         
-        // Регистрация хедера для секций
         collectionView.register(TrackerHeaderReusableView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: TrackerHeaderReusableView.reuseIdentifier)
         
         collectionView.dataSource = self
@@ -184,14 +188,22 @@ class TrackersViewController: UIViewController, UICollectionViewDataSource, UICo
         filterTrackers(by: currentDate)
     }
     
+    func isTrackerCompletedToday(_ tracker: Tracker) -> Bool {
+        return completedTrackers.contains { $0.trackerID == tracker.id && Calendar.current.isDate($0.date, inSameDayAs: currentDate) }
+    }
+
     private func filterTrackers(by date: Date) {
         let calendar = Calendar.current
-        let weekday = calendar.component(.weekday, from: date) - 1 // Приводим к диапазону 0-6 (Weekday)
+        let weekday = calendar.component(.weekday, from: date) - 1
         let weekdayEnum = Weekday(rawValue: weekday)!
         
         filteredTrackerCategories = categories.map { category in
             let filteredTrackers = category.trackers.filter { tracker in
-                // Проверяем, соответствует ли текущий день расписанию трекера
+                // Если это нерегулярное событие (пустое расписание), показываем его только в дату создания
+                if tracker.schedule.isEmpty {
+                    return calendar.isDate(tracker.creationDate, inSameDayAs: date)
+                }
+                // Для регулярных трекеров проверяем день недели и дату создания
                 return tracker.schedule.contains(weekdayEnum) && calendar.compare(tracker.creationDate, to: date, toGranularity: .day) != .orderedDescending
             }
             return TrackerCategory(name: category.name, trackers: filteredTrackers)
@@ -200,6 +212,7 @@ class TrackersViewController: UIViewController, UICollectionViewDataSource, UICo
         collectionView.reloadData()
         updateIconVisibility()
     }
+
 
     
     private func updateIconVisibility() {
@@ -235,11 +248,11 @@ class TrackersViewController: UIViewController, UICollectionViewDataSource, UICo
     // MARK: - UICollectionViewDelegateFlowLayout
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let width = (collectionView.bounds.width - 48) / 2 // Два элемента в ряду
-        return CGSize(width: width, height: 148) // Увеличен размер ячейки для размещения двух блоков
+        let width = (collectionView.bounds.width - 48) / 2
+        return CGSize(width: width, height: 148)
     }
     
-    // MARK: - Хэдеры для секций
+    // MARK: - Headers for sections
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         guard kind == UICollectionView.elementKindSectionHeader else {
@@ -255,34 +268,47 @@ class TrackersViewController: UIViewController, UICollectionViewDataSource, UICo
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        return CGSize(width: collectionView.bounds.width, height: 18) // Высота хедера
+        return CGSize(width: collectionView.bounds.width, height: 18)
     }
     
     // MARK: - TrackerCollectionViewCellDelegate
     
-        func isTrackerCompletedToday(_ tracker: Tracker) -> Bool {
-            return completedTrackers.contains { $0.trackerID == tracker.id && Calendar.current.isDate($0.date, inSameDayAs: currentDate) }
-        }
     
     func totalCompletions(for tracker: Tracker) -> Int {
-         return completedTrackers.filter { $0.trackerID == tracker.id }.count
-     }
+        return completedTrackers.filter { $0.trackerID == tracker.id }.count
+    }
     
-        func didCompleteTracker(_ cell: TrackerCollectionViewCell, tracker: Tracker, isCompleted: Bool) {
-            guard let indexPath = collectionView.indexPath(for: cell) else { return }
-            
-            let record = TrackerRecord(trackerID: tracker.id, date: currentDate)
-            
-            if isCompleted {
-                completedTrackers.insert(record)
-            } else {
-                completedTrackers.remove(record)
-            }
-            
-            cell.tracker = tracker
-            cell.updateButtonAppearance()
-            
-            collectionView.reloadItems(at: [indexPath])
+    func didCompleteTracker(_ cell: TrackerCollectionViewCell, tracker: Tracker, isCompleted: Bool) {
+        guard let indexPath = collectionView.indexPath(for: cell) else { return }
+        
+        let record = TrackerRecord(trackerID: tracker.id, date: currentDate)
+        
+        if isCompleted {
+            completedTrackers.insert(record)
+        } else {
+            completedTrackers.remove(record)
         }
+        
+        cell.tracker = tracker
+        cell.updateButtonAppearance()
+        
+        collectionView.reloadItems(at: [indexPath])
     }
 
+
+    
+    // MARK: - Adding new tracker to the selected category
+    
+    private func addNewTrackerCategory(_ newCategory: TrackerCategory) {
+        if let existingCategoryIndex = categories.firstIndex(where: { $0.name == newCategory.name }) {
+            // Если категория существует, добавляем трекер в нее
+            categories[existingCategoryIndex].trackers.append(contentsOf: newCategory.trackers)
+        } else {
+            // Если категория новая, создаем ее
+            categories.append(newCategory)
+        }
+        
+        filterTrackers(by: currentDate)
+        collectionView.reloadData()
+    }
+}

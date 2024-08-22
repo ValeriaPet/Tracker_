@@ -13,6 +13,7 @@
 		040180AE2C7675BF00A5DAFC /* TrackerHeaderReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 040180AD2C7675BF00A5DAFC /* TrackerHeaderReusableView.swift */; };
 		040180B02C77A63100A5DAFC /* TrackerModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 040180AF2C77A63100A5DAFC /* TrackerModels.swift */; };
 		040180B22C77A6C600A5DAFC /* TrackerData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 040180B12C77A6C600A5DAFC /* TrackerData.swift */; };
+		040180B52C77C6CA00A5DAFC /* CategorySelectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 040180B42C77C6CA00A5DAFC /* CategorySelectionViewController.swift */; };
 		046544672C753DA40036A752 /* TypeSelectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 046544662C753DA40036A752 /* TypeSelectionViewController.swift */; };
 		046544692C753F940036A752 /* HabitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 046544682C753F940036A752 /* HabitViewController.swift */; };
 		0465446B2C7550650036A752 /* EventViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0465446A2C7550650036A752 /* EventViewController.swift */; };
@@ -52,6 +53,7 @@
 		040180AD2C7675BF00A5DAFC /* TrackerHeaderReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerHeaderReusableView.swift; sourceTree = "<group>"; };
 		040180AF2C77A63100A5DAFC /* TrackerModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerModels.swift; sourceTree = "<group>"; };
 		040180B12C77A6C600A5DAFC /* TrackerData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerData.swift; sourceTree = "<group>"; };
+		040180B42C77C6CA00A5DAFC /* CategorySelectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySelectionViewController.swift; sourceTree = "<group>"; };
 		046544662C753DA40036A752 /* TypeSelectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeSelectionViewController.swift; sourceTree = "<group>"; };
 		046544682C753F940036A752 /* HabitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitViewController.swift; sourceTree = "<group>"; };
 		0465446A2C7550650036A752 /* EventViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventViewController.swift; sourceTree = "<group>"; };
@@ -145,6 +147,7 @@
 				0465446C2C7559E50036A752 /* ScheduleViewController.swift */,
 				040180AB2C766E2A00A5DAFC /* StatisticsViewController.swift */,
 				0494E7BE2C5AC71E00974890 /* Info.plist */,
+				040180B42C77C6CA00A5DAFC /* CategorySelectionViewController.swift */,
 			);
 			path = Tracker;
 			sourceTree = "<group>";
@@ -311,6 +314,7 @@
 				040180AC2C766E2A00A5DAFC /* StatisticsViewController.swift in Sources */,
 				040180B02C77A63100A5DAFC /* TrackerModels.swift in Sources */,
 				0465446B2C7550650036A752 /* EventViewController.swift in Sources */,
+				040180B52C77C6CA00A5DAFC /* CategorySelectionViewController.swift in Sources */,
 				046544672C753DA40036A752 /* TypeSelectionViewController.swift in Sources */,
 				046544692C753F940036A752 /* HabitViewController.swift in Sources */,
 				040180AE2C7675BF00A5DAFC /* TrackerHeaderReusableView.swift in Sources */,

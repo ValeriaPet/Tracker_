@@ -1,8 +1,10 @@
-
 import Foundation
 import UIKit
 
 class TypeSelectionViewController: UIViewController {
+    
+    // Замыкание для передачи нового трекера обратно
+    var onCreateTracker: ((TrackerCategory) -> Void)?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -60,15 +62,19 @@ class TypeSelectionViewController: UIViewController {
     
     @objc func habitButtonTapped() {
         let createHabitVC = HabitViewController()
+        createHabitVC.onCreateTracker = { [weak self] newCategory in
+            self?.onCreateTracker?(newCategory)
+        }
         createHabitVC.modalPresentationStyle = .pageSheet
         present(createHabitVC, animated: true, completion: nil)
     }
     
-    
     @objc func eventButtonTapped() {
         let createEventVC = EventViewController()
+        createEventVC.onCreateTracker = { [weak self] newCategory in
+            self?.onCreateTracker?(newCategory)
+        }
         createEventVC.modalPresentationStyle = .pageSheet
         present(createEventVC, animated: true, completion: nil)
     }
 }
-
