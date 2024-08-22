@@ -1,4 +1,3 @@
-
 import Foundation
 import UIKit
 
@@ -36,4 +35,3 @@ class TrackerHeaderReusableView: UICollectionReusableView {
         ])
     }
 }
-

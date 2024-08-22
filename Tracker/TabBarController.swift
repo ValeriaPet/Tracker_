@@ -6,7 +6,11 @@ class TabBarController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // Инициализация контроллеров для вкладок
+        setupBars()
+        setUpperLine()
+    }
+        
+        private func setupBars() {
         let trackersViewController = TrackersViewController()
         trackersViewController.tabBarItem = UITabBarItem(title: "Трекеры", image: UIImage(named: "trackers"), selectedImage: nil)
         
@@ -16,5 +20,19 @@ class TabBarController: UITabBarController {
         viewControllers = [trackersViewController, statisticsViewController]
         selectedIndex = 0
         tabBar.tintColor = .systemBlue
+    }
+    
+    private func setUpperLine () {
+        let upperLine = UIView()
+        upperLine.backgroundColor = .lightGray
+        upperLine.translatesAutoresizingMaskIntoConstraints = false
+        self.tabBar.addSubview(upperLine)
+        
+        NSLayoutConstraint.activate([
+            upperLine.heightAnchor.constraint(equalToConstant: 0.5),
+            upperLine.topAnchor.constraint(equalTo: tabBar.safeAreaLayoutGuide.topAnchor, constant: 0),
+            upperLine.leadingAnchor.constraint(equalTo: tabBar.safeAreaLayoutGuide.leadingAnchor, constant: 0),
+            upperLine.trailingAnchor.constraint(equalTo: tabBar.safeAreaLayoutGuide.trailingAnchor, constant: 0)
+        ])
     }
 }

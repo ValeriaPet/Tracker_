@@ -1,28 +1,5 @@
-
 import Foundation
 import UIKit
-
-struct Tracker {
-    let id: UUID
-    let category: String
-    let title: String
-    var daysCompleted: Int
-    var isCompletedForToday: Bool
-    let color: UIColor
-    let emoji: String
-    let creationDate: Date
-    let totalCompletions: Int // Количество необходимых выполнений
-}
-
-
-struct TrackerCategory {
-    let name: String
-    var trackers: [Tracker]
-}
-
-protocol TrackerCollectionViewCellDelegate: AnyObject {
-    func didCompleteTracker(_ cell: TrackerCollectionViewCell, tracker: Tracker, isCompleted: Bool)
-}
 
 class TrackerCollectionViewCell: UICollectionViewCell {
     
@@ -31,10 +8,8 @@ class TrackerCollectionViewCell: UICollectionViewCell {
     private let coloredView = UIView()
     private let titleLabel = UILabel()
     private let emojiLabel = UILabel()
-    
-    private let completionView = UIView()
-    private let daysLabel = UILabel()
     private let completionButton = UIButton()
+    private let daysLabel = UILabel()  // Label для отображения количества выполнений
     
     weak var delegate: TrackerCollectionViewCellDelegate?
     
@@ -43,9 +18,9 @@ class TrackerCollectionViewCell: UICollectionViewCell {
             guard let tracker = tracker else { return }
             titleLabel.text = tracker.title
             emojiLabel.text = tracker.emoji
-            daysLabel.text = "\(tracker.daysCompleted) дней"
-            updateCompletionButton(for: tracker.isCompletedForToday)
+            updateCompletionButton(for: tracker)
             coloredView.backgroundColor = tracker.color
+            updateDaysCompleted()  // Обновляем отображение количества выполнений
         }
     }
     
@@ -62,7 +37,6 @@ class TrackerCollectionViewCell: UICollectionViewCell {
         contentView.layer.cornerRadius = 16
         contentView.clipsToBounds = true
         
-        // Настройка цветного блока
         coloredView.layer.cornerRadius = 16
         coloredView.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(coloredView)
@@ -77,23 +51,16 @@ class TrackerCollectionViewCell: UICollectionViewCell {
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         coloredView.addSubview(titleLabel)
         
-        // Настройка бесцветного блока
-        completionView.backgroundColor = .white
-        completionView.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(completionView)
-        
         daysLabel.font = UIFont.systemFont(ofSize: 12, weight: .regular)
         daysLabel.textColor = .black
         daysLabel.translatesAutoresizingMaskIntoConstraints = false
-        completionView.addSubview(daysLabel)
+        contentView.addSubview(daysLabel)
         
         completionButton.translatesAutoresizingMaskIntoConstraints = false
         completionButton.addTarget(self, action: #selector(completionButtonTapped), for: .touchUpInside)
-        completionView.addSubview(completionButton)
+        contentView.addSubview(completionButton)
         
-        // Установка констрейнтов
         NSLayoutConstraint.activate([
-            // Цветной блок
             coloredView.topAnchor.constraint(equalTo: contentView.topAnchor),
             coloredView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             coloredView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
@@ -106,41 +73,42 @@ class TrackerCollectionViewCell: UICollectionViewCell {
             titleLabel.trailingAnchor.constraint(equalTo: coloredView.trailingAnchor, constant: -8),
             titleLabel.bottomAnchor.constraint(equalTo: coloredView.bottomAnchor, constant: -8),
             
-            // Бесцветный блок
-            completionView.topAnchor.constraint(equalTo: coloredView.bottomAnchor),
-            completionView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            completionView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            completionView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            daysLabel.topAnchor.constraint(equalTo: coloredView.bottomAnchor, constant: 8),
+            daysLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 8),
             
-            daysLabel.leadingAnchor.constraint(equalTo: completionView.leadingAnchor, constant: 8),
-            daysLabel.centerYAnchor.constraint(equalTo: completionView.centerYAnchor),
-            
-            completionButton.trailingAnchor.constraint(equalTo: completionView.trailingAnchor, constant: -8),
-            completionButton.centerYAnchor.constraint(equalTo: completionView.centerYAnchor),
+            completionButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8),
+            completionButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
             completionButton.widthAnchor.constraint(equalToConstant: 34),
             completionButton.heightAnchor.constraint(equalToConstant: 34)
         ])
     }
-    private func updateCompletionButton(for isCompleted: Bool) {
+    
+    func updateButtonAppearance() {
         guard let tracker = tracker else { return }
+        updateCompletionButton(for: tracker)
+    }
+    
+    private func updateCompletionButton(for tracker: Tracker) {
+        guard let isCompleted = delegate?.isTrackerCompletedToday(tracker) else { return }
         let originalColor = tracker.color
-        
+
         if isCompleted {
-            // Приглушаем цвет, уменьшая альфа-канал
             completionButton.tintColor = originalColor.withAlphaComponent(0.5)
             completionButton.setImage(UIImage(systemName: "checkmark.circle.fill"), for: .normal)
         } else {
-            // Восстанавливаем исходный цвет
             completionButton.tintColor = originalColor
             completionButton.setImage(UIImage(systemName: "plus.circle.fill"), for: .normal)
         }
     }
     
+    private func updateDaysCompleted() {
+        guard let tracker = tracker, let totalCompletions = delegate?.totalCompletions(for: tracker) else { return }
+        daysLabel.text = "\(totalCompletions) days"
+    }
+    
     @objc private func completionButtonTapped() {
         guard let tracker = tracker else { return }
-        delegate?.didCompleteTracker(self, tracker: tracker, isCompleted: !tracker.isCompletedForToday)
+        let isCompleted = delegate?.isTrackerCompletedToday(tracker) ?? false
+        delegate?.didCompleteTracker(self, tracker: tracker, isCompleted: !isCompleted)
     }
 }
-
-
-

@@ -4,8 +4,14 @@ import UIKit
 class TrackersViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, TrackerCollectionViewCellDelegate {
     
     private var collectionView: UICollectionView!
-    private var trackerCategories: [TrackerCategory] = []
+    private var categories: [TrackerCategory] = []
     private var filteredTrackerCategories: [TrackerCategory] = []
+    private var completedTrackers: Set<TrackerRecord> = []
+    private var currentDate: Date = Date() {
+        didSet {
+            filterTrackers(by: currentDate)
+        }
+    }
     
     private var searchBar = UISearchBar()
     private var label = UILabel()
@@ -28,7 +34,7 @@ class TrackersViewController: UIViewController, UICollectionViewDataSource, UICo
         setupIcon()
         loadTrackers()
         
-        filterTrackers(by: Date())
+        filterTrackers(by: currentDate)
     }
     
     private func setupNavigationBar() {
@@ -112,7 +118,7 @@ class TrackersViewController: UIViewController, UICollectionViewDataSource, UICo
             datePicker.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16)
         ])
     }
-
+    
     private func setupIcon() {
         iconImageView.backgroundColor = .none
         iconImageView.translatesAutoresizingMaskIntoConstraints = false
@@ -174,54 +180,20 @@ class TrackersViewController: UIViewController, UICollectionViewDataSource, UICo
     }
     
     private func loadTrackers() {
-        let calendar = Calendar.current
-        let today = Date()
-        
-        let yesterday = calendar.date(byAdding: .day, value: -1, to: today)!
-        let twoDaysAgo = calendar.date(byAdding: .day, value: -2, to: today)!
-        
-        // Создаем примеры категорий и трекеров с учетом количества дней выполнения
-        trackerCategories = [
-            TrackerCategory(name: "Happy House", trackers: [
-                Tracker(id: UUID(),
-                        category: "Happy House",
-                        title: "Поливать растения",
-                        daysCompleted: 1,
-                        isCompletedForToday: false,
-                        color: .colorSelection1,
-                        emoji: "🌱",
-                        creationDate: twoDaysAgo,
-                        totalCompletions: 2)
-            ]),
-            TrackerCategory(name: "Favorite things", trackers: [
-                Tracker(id: UUID(),
-                        category: "Favorite things",
-                        title: "Кошка заслонила камеру на созвоне",
-                        daysCompleted: 1,
-                        isCompletedForToday: false,
-                        color: .colorSelection2,
-                        emoji: "🐱",
-                        creationDate: twoDaysAgo,
-                        totalCompletions: 2),
-                
-                Tracker(id: UUID(),
-                        category: "Favorite things",
-                        title: "Бабушка прислала открытку в WhatsApp",
-                        daysCompleted: 1,
-                        isCompletedForToday: false,
-                        color: .colorSelection3,
-                        emoji: "👵",
-                        creationDate: twoDaysAgo,
-                        totalCompletions: 2)
-            ])
-        ]
-        filterTrackers(by: today)
+        categories = TrackerData.getTrackerCategories()
+        filterTrackers(by: currentDate)
     }
-
+    
     private func filterTrackers(by date: Date) {
-        // Фильтруем трекеры, созданные на указанную дату
-        filteredTrackerCategories = trackerCategories.map { category in
-            let filteredTrackers = category.trackers.filter { Calendar.current.isDate($0.creationDate, inSameDayAs: date) }
+        let calendar = Calendar.current
+        let weekday = calendar.component(.weekday, from: date) - 1 // Приводим к диапазону 0-6 (Weekday)
+        let weekdayEnum = Weekday(rawValue: weekday)!
+        
+        filteredTrackerCategories = categories.map { category in
+            let filteredTrackers = category.trackers.filter { tracker in
+                // Проверяем, соответствует ли текущий день расписанию трекера
+                return tracker.schedule.contains(weekdayEnum) && calendar.compare(tracker.creationDate, to: date, toGranularity: .day) != .orderedDescending
+            }
             return TrackerCategory(name: category.name, trackers: filteredTrackers)
         }.filter { !$0.trackers.isEmpty }
         
@@ -229,25 +201,23 @@ class TrackersViewController: UIViewController, UICollectionViewDataSource, UICo
         updateIconVisibility()
     }
 
+    
     private func updateIconVisibility() {
-        // Если нет трекеров для отображения, показываем заглушку
         iconImageView.isHidden = !filteredTrackerCategories.isEmpty
     }
-
     
     @objc private func dateChanged(_ sender: UIDatePicker) {
-        filterTrackers(by: sender.date)
+        currentDate = sender.date
     }
-
     
     // MARK: - UICollectionViewDataSource
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return trackerCategories.count
+        return filteredTrackerCategories.count
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return trackerCategories[section].trackers.count
+        return filteredTrackerCategories[section].trackers.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -255,7 +225,7 @@ class TrackersViewController: UIViewController, UICollectionViewDataSource, UICo
             return UICollectionViewCell()
         }
         
-        let tracker = trackerCategories[indexPath.section].trackers[indexPath.item]
+        let tracker = filteredTrackerCategories[indexPath.section].trackers[indexPath.item]
         cell.tracker = tracker
         cell.delegate = self
         
@@ -280,7 +250,7 @@ class TrackersViewController: UIViewController, UICollectionViewDataSource, UICo
             return UICollectionReusableView()
         }
         
-        header.title = trackerCategories[indexPath.section].name
+        header.title = filteredTrackerCategories[indexPath.section].name
         return header
     }
     
@@ -290,20 +260,29 @@ class TrackersViewController: UIViewController, UICollectionViewDataSource, UICo
     
     // MARK: - TrackerCollectionViewCellDelegate
     
-    func didCompleteTracker(_ cell: TrackerCollectionViewCell, tracker: Tracker, isCompleted: Bool) {
-        guard let indexPath = collectionView.indexPath(for: cell) else { return }
-        
-        var updatedTracker = trackerCategories[indexPath.section].trackers[indexPath.item]
-        
-        if isCompleted {
-            updatedTracker.isCompletedForToday = true
-            updatedTracker.daysCompleted += 1
-        } else {
-            updatedTracker.isCompletedForToday = false
-            updatedTracker.daysCompleted -= 1
+        func isTrackerCompletedToday(_ tracker: Tracker) -> Bool {
+            return completedTrackers.contains { $0.trackerID == tracker.id && Calendar.current.isDate($0.date, inSameDayAs: currentDate) }
         }
-        
-        trackerCategories[indexPath.section].trackers[indexPath.item] = updatedTracker
-        collectionView.reloadItems(at: [indexPath])
+    
+    func totalCompletions(for tracker: Tracker) -> Int {
+         return completedTrackers.filter { $0.trackerID == tracker.id }.count
+     }
+    
+        func didCompleteTracker(_ cell: TrackerCollectionViewCell, tracker: Tracker, isCompleted: Bool) {
+            guard let indexPath = collectionView.indexPath(for: cell) else { return }
+            
+            let record = TrackerRecord(trackerID: tracker.id, date: currentDate)
+            
+            if isCompleted {
+                completedTrackers.insert(record)
+            } else {
+                completedTrackers.remove(record)
+            }
+            
+            cell.tracker = tracker
+            cell.updateButtonAppearance()
+            
+            collectionView.reloadItems(at: [indexPath])
+        }
     }
-}
+

@@ -11,6 +11,8 @@
 		040180AA2C76680800A5DAFC /* TrackerCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 040180A92C76680800A5DAFC /* TrackerCollectionViewCell.swift */; };
 		040180AC2C766E2A00A5DAFC /* StatisticsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 040180AB2C766E2A00A5DAFC /* StatisticsViewController.swift */; };
 		040180AE2C7675BF00A5DAFC /* TrackerHeaderReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 040180AD2C7675BF00A5DAFC /* TrackerHeaderReusableView.swift */; };
+		040180B02C77A63100A5DAFC /* TrackerModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 040180AF2C77A63100A5DAFC /* TrackerModels.swift */; };
+		040180B22C77A6C600A5DAFC /* TrackerData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 040180B12C77A6C600A5DAFC /* TrackerData.swift */; };
 		046544672C753DA40036A752 /* TypeSelectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 046544662C753DA40036A752 /* TypeSelectionViewController.swift */; };
 		046544692C753F940036A752 /* HabitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 046544682C753F940036A752 /* HabitViewController.swift */; };
 		0465446B2C7550650036A752 /* EventViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0465446A2C7550650036A752 /* EventViewController.swift */; };
@@ -48,6 +50,8 @@
 		040180A92C76680800A5DAFC /* TrackerCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerCollectionViewCell.swift; sourceTree = "<group>"; };
 		040180AB2C766E2A00A5DAFC /* StatisticsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsViewController.swift; sourceTree = "<group>"; };
 		040180AD2C7675BF00A5DAFC /* TrackerHeaderReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerHeaderReusableView.swift; sourceTree = "<group>"; };
+		040180AF2C77A63100A5DAFC /* TrackerModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerModels.swift; sourceTree = "<group>"; };
+		040180B12C77A6C600A5DAFC /* TrackerData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerData.swift; sourceTree = "<group>"; };
 		046544662C753DA40036A752 /* TypeSelectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeSelectionViewController.swift; sourceTree = "<group>"; };
 		046544682C753F940036A752 /* HabitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitViewController.swift; sourceTree = "<group>"; };
 		0465446A2C7550650036A752 /* EventViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventViewController.swift; sourceTree = "<group>"; };
@@ -93,6 +97,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		040180B32C77A6F400A5DAFC /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				040180AF2C77A63100A5DAFC /* TrackerModels.swift */,
+				040180B12C77A6C600A5DAFC /* TrackerData.swift */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
 		0494E7A42C5AC71D00974890 = {
 			isa = PBXGroup;
 			children = (
@@ -100,6 +113,7 @@
 				0494E7B22C5AC71D00974890 /* SceneDelegate.swift */,
 				0494E7BB2C5AC71E00974890 /* LaunchScreen.storyboard */,
 				0494E7AF2C5AC71D00974890 /* Tracker */,
+				040180B32C77A6F400A5DAFC /* Data */,
 				0494E7B92C5AC71E00974890 /* Assets.xcassets */,
 				0494E7E52C5ACE8800974890 /* Font */,
 				0494E7C62C5AC71E00974890 /* TrackerTests */,
@@ -292,8 +306,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				040180B22C77A6C600A5DAFC /* TrackerData.swift in Sources */,
 				0494E7B52C5AC71D00974890 /* TabBarController.swift in Sources */,
 				040180AC2C766E2A00A5DAFC /* StatisticsViewController.swift in Sources */,
+				040180B02C77A63100A5DAFC /* TrackerModels.swift in Sources */,
 				0465446B2C7550650036A752 /* EventViewController.swift in Sources */,
 				046544672C753DA40036A752 /* TypeSelectionViewController.swift in Sources */,
 				046544692C753F940036A752 /* HabitViewController.swift in Sources */,
