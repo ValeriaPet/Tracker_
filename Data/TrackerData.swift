@@ -15,7 +15,7 @@ struct TrackerData {
                         creationDate: today),
                 
                 Tracker(id: UUID(),
-                        title: "Послать Куроо Тецуро нахуй",
+                        title: "Проклинать Куроо Тецуро",
                         color: .colorSelection11,
                         emoji: "😈",
                         schedule: [.monday, .tuesday, .wednesday],
