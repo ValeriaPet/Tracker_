@@ -9,7 +9,6 @@ protocol TrackerCollectionViewCellDelegate: AnyObject {
     func totalCompletions(for tracker: Tracker) -> Int
 }
 
-
 // MARK: - Модели данных
 
 struct Tracker {

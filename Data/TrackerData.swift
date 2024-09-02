@@ -2,7 +2,14 @@ import Foundation
 
 struct TrackerData {
     static func getTrackerCategories() -> [TrackerCategory] {
-        let calendar = Calendar.current
+        let russianCalendar: Calendar = {
+            var calendar = Calendar(identifier: .gregorian)
+            calendar.locale = Locale(identifier: "ru_RU")
+            calendar.firstWeekday = 2 // 2 соответствует понедельнику
+            calendar.timeZone = TimeZone(identifier: "Europe/Moscow")! // Установка московского времени
+            return calendar
+        }()
+
         let today = Date()
         
         var categories: [TrackerCategory] = [
@@ -27,14 +34,14 @@ struct TrackerData {
                         color: .colorSelection1,
                         emoji: "🐱",
                         schedule: [.tuesday, .thursday],
-                        creationDate: calendar.date(byAdding: .day, value: -1, to: today)!),
+                        creationDate: russianCalendar.date(byAdding: .day, value: -1, to: today)!),
                 
                 Tracker(id: UUID(),
                         title: "Попить кофе",
                         color: .colorSelection15,
                         emoji: "☕️",
                         schedule: [.saturday, .sunday],
-                        creationDate: calendar.date(byAdding: .day, value: -5, to: today)!)
+                        creationDate: russianCalendar.date(byAdding: .day, value: -5, to: today)!)
             ])
         ]
  

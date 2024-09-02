@@ -1,4 +1,3 @@
-import Foundation
 import UIKit
 
 class TrackerCollectionViewCell: UICollectionViewCell {
@@ -18,9 +17,9 @@ class TrackerCollectionViewCell: UICollectionViewCell {
             guard let tracker = tracker else { return }
             titleLabel.text = tracker.title
             emojiLabel.text = tracker.emoji
-            updateCompletionButton(for: tracker)
             coloredView.backgroundColor = tracker.color
-            updateDaysCompleted()  // Обновляем отображение количества выполнений
+            updateButtonAppearance()
+            updateDaysCompleted()
         }
     }
     
@@ -101,9 +100,9 @@ class TrackerCollectionViewCell: UICollectionViewCell {
         }
     }
     
-    private func updateDaysCompleted() {
+    func updateDaysCompleted() {
         guard let tracker = tracker, let totalCompletions = delegate?.totalCompletions(for: tracker) else { return }
-        daysLabel.text = "\(totalCompletions) days"
+        daysLabel.text = "\(totalCompletions) дней"
     }
     
     @objc private func completionButtonTapped() {

@@ -2,8 +2,8 @@ import UIKit
 
 class ScheduleViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
-    let daysOfWeek = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
-    var selectedDays: [Bool] = Array(repeating: false, count: 7) 
+    let daysOfWeek: [String] = [] // Используем локализованные названия дней недели
+    var selectedDays: [Bool] = Array(repeating: false, count: 7)
     
     // Замыкание для передачи выбранных дней
     var onDaysSelected: (([String]) -> Void)?

@@ -199,11 +199,9 @@ class TrackersViewController: UIViewController, UICollectionViewDataSource, UICo
         
         filteredTrackerCategories = categories.map { category in
             let filteredTrackers = category.trackers.filter { tracker in
-                // Если это нерегулярное событие (пустое расписание), показываем его только в дату создания
                 if tracker.schedule.isEmpty {
                     return calendar.isDate(tracker.creationDate, inSameDayAs: date)
                 }
-                // Для регулярных трекеров проверяем день недели и дату создания
                 return tracker.schedule.contains(weekdayEnum) && calendar.compare(tracker.creationDate, to: date, toGranularity: .day) != .orderedDescending
             }
             return TrackerCategory(name: category.name, trackers: filteredTrackers)
@@ -212,8 +210,6 @@ class TrackersViewController: UIViewController, UICollectionViewDataSource, UICo
         collectionView.reloadData()
         updateIconVisibility()
     }
-
-
     
     private func updateIconVisibility() {
         iconImageView.isHidden = !filteredTrackerCategories.isEmpty
@@ -241,6 +237,9 @@ class TrackersViewController: UIViewController, UICollectionViewDataSource, UICo
         let tracker = filteredTrackerCategories[indexPath.section].trackers[indexPath.item]
         cell.tracker = tracker
         cell.delegate = self
+        
+        cell.updateButtonAppearance()  // Обновляем состояние кнопки
+        cell.updateDaysCompleted()  // Обновляем количество выполнений
         
         return cell
     }
@@ -273,7 +272,6 @@ class TrackersViewController: UIViewController, UICollectionViewDataSource, UICo
     
     // MARK: - TrackerCollectionViewCellDelegate
     
-    
     func totalCompletions(for tracker: Tracker) -> Int {
         return completedTrackers.filter { $0.trackerID == tracker.id }.count
     }
@@ -289,22 +287,18 @@ class TrackersViewController: UIViewController, UICollectionViewDataSource, UICo
             completedTrackers.remove(record)
         }
         
-        cell.tracker = tracker
         cell.updateButtonAppearance()
+        cell.updateDaysCompleted()
         
         collectionView.reloadItems(at: [indexPath])
     }
-
-
     
     // MARK: - Adding new tracker to the selected category
     
     private func addNewTrackerCategory(_ newCategory: TrackerCategory) {
         if let existingCategoryIndex = categories.firstIndex(where: { $0.name == newCategory.name }) {
-            // Если категория существует, добавляем трекер в нее
             categories[existingCategoryIndex].trackers.append(contentsOf: newCategory.trackers)
         } else {
-            // Если категория новая, создаем ее
             categories.append(newCategory)
         }
         
