@@ -1,8 +1,8 @@
 import UIKit
 
-class ScheduleViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+final class ScheduleViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
-    let daysOfWeek: [String] = [] // Используем локализованные названия дней недели
+    let daysOfWeek: [String] = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"] // Используем локализованные названия дней недели
     var selectedDays: [Bool] = Array(repeating: false, count: 7)
     
     // Замыкание для передачи выбранных дней
@@ -112,7 +112,7 @@ class ScheduleViewController: UIViewController, UITableViewDelegate, UITableView
         return cell
     }
     
-    @objc func switchChanged(_ sender: UISwitch) {
+    @objc private func switchChanged(_ sender: UISwitch) {
         selectedDays[sender.tag] = sender.isOn
     }
     

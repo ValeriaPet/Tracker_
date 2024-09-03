@@ -5,6 +5,7 @@ class EventViewController: UIViewController {
     
     let categoryButton = UIButton(type: .system)
     let nameTextField = UITextField()
+    let createButton = UIButton(type: .system)
     
     var onCreateTracker: ((TrackerCategory) -> Void)?
     var selectedCategory: String = ""
@@ -14,6 +15,7 @@ class EventViewController: UIViewController {
         
         view.backgroundColor = .white
         setupUI()
+        setupObservers()
     }
     
     func setupUI() {
@@ -31,12 +33,14 @@ class EventViewController: UIViewController {
         nameTextField.backgroundColor = .backgroundDay
         nameTextField.layer.cornerRadius = 16
         nameTextField.translatesAutoresizingMaskIntoConstraints = false
+        nameTextField.setLeftPaddingPoints(16)
         view.addSubview(nameTextField)
         
         // Кнопка для выбора категории
         categoryButton.backgroundColor = .backgroundDay
         categoryButton.setTitle("Категория", for: .normal)
         categoryButton.setTitleColor(.black, for: .normal)
+        categoryButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         categoryButton.contentHorizontalAlignment = .left
         categoryButton.titleEdgeInsets = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 0)
         categoryButton.layer.cornerRadius = 16
@@ -53,18 +57,19 @@ class EventViewController: UIViewController {
         // Кнопка "Отменить"
         let cancelButton = UIButton(type: .system)
         cancelButton.setTitle("Отменить", for: .normal)
-        cancelButton.setTitleColor(.red, for: .normal)
+        cancelButton.setTitleColor(UIColor.systemRed.withAlphaComponent(0.5), for: .normal)
+        cancelButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         cancelButton.layer.borderWidth = 1
-        cancelButton.layer.borderColor = UIColor.red.cgColor
+        cancelButton.layer.borderColor = UIColor.systemRed.withAlphaComponent(0.5).cgColor
         cancelButton.layer.cornerRadius = 16
         cancelButton.translatesAutoresizingMaskIntoConstraints = false
         cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
         view.addSubview(cancelButton)
         
         // Кнопка "Создать"
-        let createButton = UIButton(type: .system)
         createButton.setTitle("Создать", for: .normal)
         createButton.setTitleColor(.white, for: .normal)
+        createButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         createButton.backgroundColor = .gray
         createButton.layer.cornerRadius = 16
         createButton.translatesAutoresizingMaskIntoConstraints = false
@@ -101,28 +106,37 @@ class EventViewController: UIViewController {
         ])
     }
     
-    @objc func categoryButtonTapped() {
+    private func setupObservers() {
+        
+        nameTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+    }
+    
+    @objc private func textFieldDidChange() {
+        
+        updateCreateButtonState()
+    }
+    
+    @objc private func categoryButtonTapped() {
         let categorySelectionVC = CategorySelectionViewController()
         categorySelectionVC.onCategorySelected = { [weak self] selectedCategory in
             self?.selectedCategory = selectedCategory
             self?.categoryButton.setTitle("Категория \(selectedCategory)", for: .normal)
+            self?.updateCreateButtonState()
         }
         categorySelectionVC.modalPresentationStyle = .pageSheet
         present(categorySelectionVC, animated: true, completion: nil)
     }
     
-    @objc func cancelButtonTapped() {
+    @objc private func cancelButtonTapped() {
         dismiss(animated: true, completion: nil)
     }
     
-    @objc func createButtonTapped() {
+    @objc private func createButtonTapped() {
         guard let name = nameTextField.text, !name.isEmpty else {
-            // Покажите сообщение о необходимости ввести название
             return
         }
         
         guard !selectedCategory.isEmpty else {
-            // Покажите сообщение о необходимости выбрать категорию
             return
         }
         
@@ -137,5 +151,19 @@ class EventViewController: UIViewController {
         
         onCreateTracker?(newCategory)
         dismiss(animated: true, completion: nil)
+    }
+    
+    private func updateCreateButtonState() {
+        let isFormValid = !nameTextField.text!.isEmpty && !selectedCategory.isEmpty
+        createButton.backgroundColor = isFormValid ? .systemBlue : .gray
+        createButton.isEnabled = isFormValid
+    }
+}
+
+extension UITextField {
+    func setLeftPaddingPoints(_ amount:CGFloat){
+        let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: amount, height: self.frame.size.height))
+        self.leftView = paddingView
+        self.leftViewMode = .always
     }
 }

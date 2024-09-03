@@ -1,6 +1,6 @@
 import UIKit
 
-class TrackersViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, TrackerCollectionViewCellDelegate {
+final class TrackersViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, TrackerCollectionViewCellDelegate {
     
     private var collectionView: UICollectionView!
     private var categories: [TrackerCategory] = []
@@ -191,7 +191,7 @@ class TrackersViewController: UIViewController, UICollectionViewDataSource, UICo
     func isTrackerCompletedToday(_ tracker: Tracker) -> Bool {
         return completedTrackers.contains { $0.trackerID == tracker.id && Calendar.current.isDate($0.date, inSameDayAs: currentDate) }
     }
-
+    
     private func filterTrackers(by date: Date) {
         let calendar = Calendar.current
         let weekday = calendar.component(.weekday, from: date) - 1

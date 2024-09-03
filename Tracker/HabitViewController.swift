@@ -4,16 +4,19 @@ class HabitViewController: UIViewController {
     
     let scheduleButton = UIButton(type: .system)
     let categoryButton = UIButton(type: .system)
-    let nameTextField = UITextField()
+    let nameTextField = UITextField()  // Обычный UITextField
+    let createButton = UIButton(type: .system)
+    let cancelButton = UIButton(type: .system)
     
     var onCreateTracker: ((TrackerCategory) -> Void)?
     var selectedSchedule: [Weekday] = []
-    var selectedCategory: String = "" // Дефолтная категория, можно изменить
+    var selectedCategory: String = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
         setupUI()
+        setupObservers()
     }
     
     func setupUI() {
@@ -23,6 +26,10 @@ class HabitViewController: UIViewController {
         titleLabel.textAlignment = .center
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(titleLabel)
+        
+        let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 75))
+        nameTextField.leftView = paddingView
+        nameTextField.leftViewMode = .always
         
         nameTextField.placeholder = "Введите название трекера"
         nameTextField.borderStyle = .none
@@ -42,7 +49,7 @@ class HabitViewController: UIViewController {
         categoryArrow.translatesAutoresizingMaskIntoConstraints = false
         
         categoryButton.backgroundColor = .none
-        categoryButton.setTitle("Категория: \(selectedCategory)", for: .normal)
+        categoryButton.setTitle("Категория \(selectedCategory)", for: .normal)
         categoryButton.setTitleColor(.black, for: .normal)
         categoryButton.contentHorizontalAlignment = .left
         categoryButton.titleEdgeInsets = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 0)
@@ -51,6 +58,8 @@ class HabitViewController: UIViewController {
         categoryButton.addTarget(self, action: #selector(categoryButtonTapped), for: .touchUpInside)
         container.addSubview(categoryButton)
         container.addSubview(categoryArrow)
+        
+        categoryButton.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
         
         let separator = UIView()
         separator.backgroundColor = .lightGray
@@ -72,24 +81,30 @@ class HabitViewController: UIViewController {
         container.addSubview(scheduleButton)
         container.addSubview(scheduleArrow)
         
-        let cancelButton = UIButton(type: .system)
+        scheduleButton.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
+        
         cancelButton.setTitle("Отменить", for: .normal)
-        cancelButton.setTitleColor(.red, for: .normal)
+        cancelButton.setTitleColor(UIColor.systemRed.withAlphaComponent(0.5), for: .normal)
+        
         cancelButton.layer.borderWidth = 1
-        cancelButton.layer.borderColor = UIColor.red.cgColor
+        cancelButton.layer.borderColor = UIColor.systemRed.withAlphaComponent(0.5).cgColor
+        
         cancelButton.layer.cornerRadius = 16
         cancelButton.translatesAutoresizingMaskIntoConstraints = false
         cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
         view.addSubview(cancelButton)
         
-        let createButton = UIButton(type: .system)
+        cancelButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        
         createButton.setTitle("Создать", for: .normal)
         createButton.setTitleColor(.white, for: .normal)
-        createButton.backgroundColor = .gray
+        createButton.backgroundColor = .lightGray
         createButton.layer.cornerRadius = 16
         createButton.translatesAutoresizingMaskIntoConstraints = false
         createButton.addTarget(self, action: #selector(createButtonTapped), for: .touchUpInside)
         view.addSubview(createButton)
+        
+        createButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
@@ -126,17 +141,25 @@ class HabitViewController: UIViewController {
             scheduleButton.trailingAnchor.constraint(equalTo: nameTextField.trailingAnchor),
             scheduleButton.heightAnchor.constraint(equalToConstant: 75),
             
-            cancelButton.leadingAnchor.constraint(equalTo: nameTextField.leadingAnchor),
-            cancelButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -50),
-            cancelButton.widthAnchor.constraint(equalToConstant: 166),
+            cancelButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            cancelButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            cancelButton.widthAnchor.constraint(equalToConstant: 163),
             cancelButton.heightAnchor.constraint(equalToConstant: 60),
             cancelButton.trailingAnchor.constraint(equalTo: createButton.leadingAnchor, constant: -8),
             
-            createButton.trailingAnchor.constraint(equalTo: nameTextField.trailingAnchor),
-            createButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -50),
-            createButton.widthAnchor.constraint(equalToConstant: 161),
+            createButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            createButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            createButton.widthAnchor.constraint(equalToConstant: 163),
             createButton.heightAnchor.constraint(equalToConstant: 60)
         ])
+    }
+    
+    private func setupObservers() {
+        nameTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+    }
+    
+    @objc func textFieldDidChange() {
+        updateCreateButtonState()
     }
     
     @objc func categoryButtonTapped() {
@@ -144,6 +167,7 @@ class HabitViewController: UIViewController {
         categorySelectionVC.onCategorySelected = { [weak self] selectedCategory in
             self?.selectedCategory = selectedCategory
             self?.categoryButton.setTitle("Категория \(selectedCategory)", for: .normal)
+            self?.updateCreateButtonState()
         }
         categorySelectionVC.modalPresentationStyle = .pageSheet
         present(categorySelectionVC, animated: true, completion: nil)
@@ -153,7 +177,6 @@ class HabitViewController: UIViewController {
         let scheduleVC = ScheduleViewController()
         scheduleVC.modalPresentationStyle = .pageSheet
         
-        // Установка замыкания для получения выбранных дней
         scheduleVC.onDaysSelected = { [weak self] selectedShortDays in
             self?.selectedSchedule = selectedShortDays.map { shortDay in
                 Weekday(rawValue: selectedShortDays.firstIndex(of: shortDay)!)!
@@ -171,14 +194,13 @@ class HabitViewController: UIViewController {
     
     @objc func createButtonTapped() {
         guard let name = nameTextField.text, !name.isEmpty else {
-            // Покажите сообщение о необходимости ввести название
             return
         }
         
         let newTracker = Tracker(id: UUID(),
                                  title: name,
-                                 color: .colorSelection13, // Цвет можно выбирать
-                                 emoji: "💀", // Эмодзи можно выбирать
+                                 color: .colorSelection13,
+                                 emoji: "💀",
                                  schedule: selectedSchedule,
                                  creationDate: Date())
         
@@ -186,5 +208,11 @@ class HabitViewController: UIViewController {
         
         onCreateTracker?(newCategory)
         dismiss(animated: true, completion: nil)
+    }
+    
+    private func updateCreateButtonState() {
+        let isFormValid = !nameTextField.text!.isEmpty && !selectedCategory.isEmpty && !selectedSchedule.isEmpty
+        createButton.isEnabled = isFormValid
+        createButton.backgroundColor = isFormValid ? .black : .lightGray
     }
 }

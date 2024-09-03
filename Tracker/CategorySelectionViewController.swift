@@ -2,10 +2,10 @@
 import Foundation
 import UIKit
 
-class CategorySelectionViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+final class CategorySelectionViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
-    var categories: [String] = ["Happy House", "Favorite things"] // Это можно заменить на реальные данные
-    var onCategorySelected: ((String) -> Void)?
+    private var categories: [String] = ["Happy House", "Favorite things"] // Это можно заменить на реальные данные
+ var onCategorySelected: ((String) -> Void)?
     
     private let tableView = UITableView()
 

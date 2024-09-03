@@ -5,14 +5,18 @@ struct TrackerData {
         let russianCalendar: Calendar = {
             var calendar = Calendar(identifier: .gregorian)
             calendar.locale = Locale(identifier: "ru_RU")
-            calendar.firstWeekday = 2 // 2 соответствует понедельнику
-            calendar.timeZone = TimeZone(identifier: "Europe/Moscow")! // Установка московского времени
+            calendar.firstWeekday = 2 
+            guard let timeZone = TimeZone(identifier: "Europe/Moscow") else {
+                  fatalError("TimeZone with identifier 'Europe/Moscow' not found")
+              }
+              calendar.timeZone = timeZone
+            
             return calendar
         }()
 
         let today = Date()
         
-        var categories: [TrackerCategory] = [
+        let categories: [TrackerCategory] = [
             TrackerCategory(name: "Happy House", trackers: [
                 Tracker(id: UUID(),
                         title: "Поливать кактус",

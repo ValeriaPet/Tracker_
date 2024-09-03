@@ -1,6 +1,6 @@
 import UIKit
 
-class TrackerCollectionViewCell: UICollectionViewCell {
+final class TrackerCollectionViewCell: UICollectionViewCell {
     
     static let reuseIdentifier = "TrackerCell"
     
@@ -8,8 +8,7 @@ class TrackerCollectionViewCell: UICollectionViewCell {
     private let titleLabel = UILabel()
     private let emojiLabel = UILabel()
     private let completionButton = UIButton()
-    private let daysLabel = UILabel()  // Label для отображения количества выполнений
-    
+    private let daysLabel = UILabel()
     weak var delegate: TrackerCollectionViewCellDelegate?
     
     var tracker: Tracker? {
@@ -72,11 +71,13 @@ class TrackerCollectionViewCell: UICollectionViewCell {
             titleLabel.trailingAnchor.constraint(equalTo: coloredView.trailingAnchor, constant: -8),
             titleLabel.bottomAnchor.constraint(equalTo: coloredView.bottomAnchor, constant: -8),
             
-            daysLabel.topAnchor.constraint(equalTo: coloredView.bottomAnchor, constant: 8),
-            daysLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 8),
+            daysLabel.topAnchor.constraint(equalTo: coloredView.bottomAnchor, constant: 16),
+            daysLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
+            daysLabel.heightAnchor.constraint(equalToConstant: 18),
             
-            completionButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8),
-            completionButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
+            completionButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
+            completionButton.topAnchor.constraint(equalTo: coloredView.bottomAnchor, constant: 8),
+            completionButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
             completionButton.widthAnchor.constraint(equalToConstant: 34),
             completionButton.heightAnchor.constraint(equalToConstant: 34)
         ])
@@ -90,15 +91,26 @@ class TrackerCollectionViewCell: UICollectionViewCell {
     private func updateCompletionButton(for tracker: Tracker) {
         guard let isCompleted = delegate?.isTrackerCompletedToday(tracker) else { return }
         let originalColor = tracker.color
-
+        
+        // Установка размеров иконок
+        let imageConfig = UIImage.SymbolConfiguration(pointSize: 12, weight: .bold) // Настройте `pointSize` по своему усмотрению
+        let checkmarkImage = UIImage(systemName: "checkmark", withConfiguration: imageConfig)
+        let plusImage = UIImage(systemName: "plus", withConfiguration: imageConfig)
+        
         if isCompleted {
-            completionButton.tintColor = originalColor.withAlphaComponent(0.5)
-            completionButton.setImage(UIImage(systemName: "checkmark.circle.fill"), for: .normal)
+            completionButton.backgroundColor = originalColor.withAlphaComponent(0.5)
+            completionButton.tintColor = .white
+            completionButton.layer.cornerRadius = 17
+            completionButton.setImage(checkmarkImage, for: .normal)
+            
         } else {
-            completionButton.tintColor = originalColor
-            completionButton.setImage(UIImage(systemName: "plus.circle.fill"), for: .normal)
+            completionButton.backgroundColor = originalColor
+            completionButton.tintColor = .white
+            completionButton.layer.cornerRadius = 17
+            completionButton.setImage(plusImage, for: .normal)
         }
     }
+    
     
     func updateDaysCompleted() {
         guard let tracker = tracker, let totalCompletions = delegate?.totalCompletions(for: tracker) else { return }

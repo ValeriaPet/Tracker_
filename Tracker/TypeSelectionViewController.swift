@@ -1,7 +1,7 @@
 import Foundation
 import UIKit
 
-class TypeSelectionViewController: UIViewController {
+final class TypeSelectionViewController: UIViewController {
     
     // Замыкание для передачи нового трекера обратно
     var onCreateTracker: ((TrackerCategory) -> Void)?

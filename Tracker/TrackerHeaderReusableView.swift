@@ -1,7 +1,7 @@
 import Foundation
 import UIKit
 
-class TrackerHeaderReusableView: UICollectionReusableView {
+final class TrackerHeaderReusableView: UICollectionReusableView {
     
     static let reuseIdentifier = "TrackerHeader"
     
