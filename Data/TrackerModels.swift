@@ -39,6 +39,14 @@ struct TrackerRecord: Hashable {
     }
 }
 
+// MARK: - Перечисление дней недели
+
 enum Weekday: Int, CaseIterable {
-    case monday, tuesday, wednesday, thursday, friday, saturday, sunday
+    case sunday
+    case monday = 1
+    case tuesday
+    case wednesday
+    case thursday
+    case friday
+    case saturday
 }

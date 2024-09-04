@@ -58,13 +58,16 @@ class EventViewController: UIViewController {
         let cancelButton = UIButton(type: .system)
         cancelButton.setTitle("Отменить", for: .normal)
         cancelButton.setTitleColor(UIColor.systemRed.withAlphaComponent(0.5), for: .normal)
-        cancelButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        
         cancelButton.layer.borderWidth = 1
         cancelButton.layer.borderColor = UIColor.systemRed.withAlphaComponent(0.5).cgColor
+        
         cancelButton.layer.cornerRadius = 16
         cancelButton.translatesAutoresizingMaskIntoConstraints = false
         cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
         view.addSubview(cancelButton)
+        
+        cancelButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         
         // Кнопка "Создать"
         createButton.setTitle("Создать", for: .normal)
@@ -93,15 +96,15 @@ class EventViewController: UIViewController {
             eventCategoryArrow.centerYAnchor.constraint(equalTo: categoryButton.centerYAnchor),
             eventCategoryArrow.trailingAnchor.constraint(equalTo: categoryButton.trailingAnchor, constant: -16),
             
-            cancelButton.leadingAnchor.constraint(equalTo: nameTextField.leadingAnchor),
-            cancelButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -50),
-            cancelButton.widthAnchor.constraint(equalToConstant: 166),
+            cancelButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            cancelButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            cancelButton.widthAnchor.constraint(equalToConstant: 163),
             cancelButton.heightAnchor.constraint(equalToConstant: 60),
             cancelButton.trailingAnchor.constraint(equalTo: createButton.leadingAnchor, constant: -8),
             
-            createButton.trailingAnchor.constraint(equalTo: nameTextField.trailingAnchor),
-            createButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -50),
-            createButton.widthAnchor.constraint(equalToConstant: 161),
+            createButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            createButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            createButton.widthAnchor.constraint(equalToConstant: 163),
             createButton.heightAnchor.constraint(equalToConstant: 60)
         ])
     }
@@ -155,7 +158,7 @@ class EventViewController: UIViewController {
     
     private func updateCreateButtonState() {
         let isFormValid = !nameTextField.text!.isEmpty && !selectedCategory.isEmpty
-        createButton.backgroundColor = isFormValid ? .systemBlue : .gray
+        createButton.backgroundColor = isFormValid ? .black : .gray
         createButton.isEnabled = isFormValid
     }
 }

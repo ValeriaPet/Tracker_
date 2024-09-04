@@ -166,7 +166,7 @@ class HabitViewController: UIViewController {
         let categorySelectionVC = CategorySelectionViewController()
         categorySelectionVC.onCategorySelected = { [weak self] selectedCategory in
             self?.selectedCategory = selectedCategory
-            self?.categoryButton.setTitle("Категория \(selectedCategory)", for: .normal)
+            self?.categoryButton.setTitle("Категория: \(selectedCategory)", for: .normal)
             self?.updateCreateButtonState()
         }
         categorySelectionVC.modalPresentationStyle = .pageSheet

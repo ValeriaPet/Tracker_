@@ -2,15 +2,13 @@ import UIKit
 
 final class ScheduleViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
-    let daysOfWeek: [String] = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"] // Используем локализованные названия дней недели
+    let daysOfWeek: [String] = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
     var selectedDays: [Bool] = Array(repeating: false, count: 7)
-    
-    // Замыкание для передачи выбранных дней
+
     var onDaysSelected: (([String]) -> Void)?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         view.backgroundColor = .white
         setupUI()
     }
@@ -72,7 +70,7 @@ final class ScheduleViewController: UIViewController, UITableViewDelegate, UITab
             
             doneButton.topAnchor.constraint(equalTo: containerView.bottomAnchor, constant: 24),
             doneButton.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
-            doneButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            doneButton.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             doneButton.heightAnchor.constraint(equalToConstant: 60),
             doneButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
         ])
@@ -119,22 +117,14 @@ final class ScheduleViewController: UIViewController, UITableViewDelegate, UITab
     // Функция для получения сокращенного названия дня
     func getShortName(for day: String) -> String {
         switch day {
-        case "Понедельник":
-            return "Пн"
-        case "Вторник":
-            return "Вт"
-        case "Среда":
-            return "Ср"
-        case "Четверг":
-            return "Чт"
-        case "Пятница":
-            return "Пт"
-        case "Суббота":
-            return "Сб"
-        case "Воскресенье":
-            return "Вс"
-        default:
-            return ""
+        case "Понедельник": return "Пн"
+        case "Вторник": return "Вт"
+        case "Среда": return "Ср"
+        case "Четверг": return "Чт"
+        case "Пятница": return "Пт"
+        case "Суббота": return "Сб"
+        case "Воскресенье": return "Вс"
+        default: return ""
         }
     }
 }

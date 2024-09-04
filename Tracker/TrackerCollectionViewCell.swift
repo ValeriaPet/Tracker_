@@ -9,28 +9,30 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     private let emojiLabel = UILabel()
     private let completionButton = UIButton()
     private let daysLabel = UILabel()
+    private var selectedDate: Date = Date()
     weak var delegate: TrackerCollectionViewCellDelegate?
-    
+
     var tracker: Tracker? {
         didSet {
             guard let tracker = tracker else { return }
             titleLabel.text = tracker.title
             emojiLabel.text = tracker.emoji
             coloredView.backgroundColor = tracker.color
+            selectedDate = Calendar.current.startOfDay(for: Date())
             updateButtonAppearance()
             updateDaysCompleted()
         }
     }
-    
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupViews()
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     private func setupViews() {
         contentView.layer.cornerRadius = 16
         contentView.clipsToBounds = true
@@ -82,18 +84,18 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
             completionButton.heightAnchor.constraint(equalToConstant: 34)
         ])
     }
-    
+
     func updateButtonAppearance() {
         guard let tracker = tracker else { return }
         updateCompletionButton(for: tracker)
     }
-    
+
     private func updateCompletionButton(for tracker: Tracker) {
         guard let isCompleted = delegate?.isTrackerCompletedToday(tracker) else { return }
         let originalColor = tracker.color
         
-        // Установка размеров иконок
-        let imageConfig = UIImage.SymbolConfiguration(pointSize: 12, weight: .bold) // Настройте `pointSize` по своему усмотрению
+        // Установка иконок
+        let imageConfig = UIImage.SymbolConfiguration(pointSize: 12, weight: .bold)
         let checkmarkImage = UIImage(systemName: "checkmark", withConfiguration: imageConfig)
         let plusImage = UIImage(systemName: "plus", withConfiguration: imageConfig)
         
@@ -102,7 +104,6 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
             completionButton.tintColor = .white
             completionButton.layer.cornerRadius = 17
             completionButton.setImage(checkmarkImage, for: .normal)
-            
         } else {
             completionButton.backgroundColor = originalColor
             completionButton.tintColor = .white
@@ -110,16 +111,40 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
             completionButton.setImage(plusImage, for: .normal)
         }
     }
-    
-    
+
     func updateDaysCompleted() {
         guard let tracker = tracker, let totalCompletions = delegate?.totalCompletions(for: tracker) else { return }
-        daysLabel.text = "\(totalCompletions) дней"
+        daysLabel.text = setStringFor(totalCompletions)
     }
-    
+
     @objc private func completionButtonTapped() {
         guard let tracker = tracker else { return }
+
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        guard let tomorrow = calendar.date(byAdding: .day, value: 1, to: today) else { return }
+
+        if selectedDate >= tomorrow {
+            print("Попытка отметить выполнение трекера на будущую дату")
+            return
+        }
+
         let isCompleted = delegate?.isTrackerCompletedToday(tracker) ?? false
         delegate?.didCompleteTracker(self, tracker: tracker, isCompleted: !isCompleted)
+    }
+
+    // Функция для склонения слова "день"
+    private func setStringFor(_ count: Int) -> String {
+        let days = count % 10
+        switch days {
+        case 0, 5, 6, 7, 8, 9:
+            return "\(count) дней"
+        case 1:
+            return "\(count) день"
+        case 2, 3, 4:
+            return "\(count) дня"
+        default:
+            return ""
+        }
     }
 }
