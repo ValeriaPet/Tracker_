@@ -9,7 +9,6 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     private let emojiLabel = UILabel()
     private let completionButton = UIButton()
     private let daysLabel = UILabel()
-    private var selectedDate: Date = Date()
     weak var delegate: TrackerCollectionViewCellDelegate?
 
     var tracker: Tracker? {
@@ -18,7 +17,6 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
             titleLabel.text = tracker.title
             emojiLabel.text = tracker.emoji
             coloredView.backgroundColor = tracker.color
-            selectedDate = Calendar.current.startOfDay(for: Date())
             updateButtonAppearance()
             updateDaysCompleted()
         }
@@ -91,6 +89,17 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }
 
     private func updateCompletionButton(for tracker: Tracker) {
+        
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        
+        // Отключаем кнопку, если текущая дата больше сегодняшней
+        if Calendar.current.compare(tracker.creationDate, to: today, toGranularity: .day) == .orderedDescending {
+            completionButton.isEnabled = false
+        } else {
+            completionButton.isEnabled = true
+        }
+
         guard let isCompleted = delegate?.isTrackerCompletedToday(tracker) else { return }
         let originalColor = tracker.color
         
@@ -119,15 +128,6 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
 
     @objc private func completionButtonTapped() {
         guard let tracker = tracker else { return }
-
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-        guard let tomorrow = calendar.date(byAdding: .day, value: 1, to: today) else { return }
-
-        if selectedDate >= tomorrow {
-            print("Попытка отметить выполнение трекера на будущую дату")
-            return
-        }
 
         let isCompleted = delegate?.isTrackerCompletedToday(tracker) ?? false
         delegate?.didCompleteTracker(self, tracker: tracker, isCompleted: !isCompleted)

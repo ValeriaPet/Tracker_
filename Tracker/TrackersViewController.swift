@@ -217,8 +217,9 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
     
     @objc private func dateChanged(_ sender: UIDatePicker) {
         currentDate = sender.date
+        collectionView.reloadData()
     }
-    
+
     // MARK: - UICollectionViewDataSource
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
@@ -233,17 +234,18 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TrackerCollectionViewCell.reuseIdentifier, for: indexPath) as? TrackerCollectionViewCell else {
             return UICollectionViewCell()
         }
-        
+
         let tracker = filteredTrackerCategories[indexPath.section].trackers[indexPath.item]
         cell.tracker = tracker
         cell.delegate = self
-        
-        cell.updateButtonAppearance()  // Обновляем состояние кнопки
-        cell.updateDaysCompleted()  // Обновляем количество выполнений
-        
+
+        // Обновляем состояние кнопки
+        cell.updateButtonAppearance()
+        cell.updateDaysCompleted()
+
         return cell
     }
-    
+
     // MARK: - UICollectionViewDelegateFlowLayout
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -278,7 +280,12 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
     
     func didCompleteTracker(_ cell: TrackerCollectionViewCell, tracker: Tracker, isCompleted: Bool) {
         guard let indexPath = collectionView.indexPath(for: cell) else { return }
-        
+
+        // Проверяем, если выбранная дата является будущей
+        if currentDate > Date() {
+            return // Не разрешаем отмечать трекер для будущего времени
+        }
+
         let record = TrackerRecord(trackerID: tracker.id, date: currentDate)
         
         if isCompleted {
@@ -287,12 +294,14 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
             completedTrackers.remove(record)
         }
         
+        // Обновляем внешний вид ячейки
         cell.updateButtonAppearance()
         cell.updateDaysCompleted()
         
+        // Перезагружаем только изменённую ячейку
         collectionView.reloadItems(at: [indexPath])
     }
-    
+
     // MARK: - Adding new tracker to the selected category
     
     private func addNewTrackerCategory(_ newCategory: TrackerCategory) {

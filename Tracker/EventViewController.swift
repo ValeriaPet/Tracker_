@@ -73,7 +73,7 @@ class EventViewController: UIViewController {
         createButton.setTitle("Создать", for: .normal)
         createButton.setTitleColor(.white, for: .normal)
         createButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        createButton.backgroundColor = .gray
+        createButton.backgroundColor = .lightGray
         createButton.layer.cornerRadius = 16
         createButton.translatesAutoresizingMaskIntoConstraints = false
         createButton.addTarget(self, action: #selector(createButtonTapped), for: .touchUpInside)
@@ -158,7 +158,7 @@ class EventViewController: UIViewController {
     
     private func updateCreateButtonState() {
         let isFormValid = !nameTextField.text!.isEmpty && !selectedCategory.isEmpty
-        createButton.backgroundColor = isFormValid ? .black : .gray
+        createButton.backgroundColor = isFormValid ? .black : .lightGray
         createButton.isEnabled = isFormValid
     }
 }

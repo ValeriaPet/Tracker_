@@ -178,15 +178,26 @@ class HabitViewController: UIViewController {
         scheduleVC.modalPresentationStyle = .pageSheet
         
         scheduleVC.onDaysSelected = { [weak self] selectedShortDays in
-            self?.selectedSchedule = selectedShortDays.map { shortDay in
-                Weekday(rawValue: selectedShortDays.firstIndex(of: shortDay)!)!
+            self?.selectedSchedule = selectedShortDays.compactMap { shortDay in
+                switch shortDay {
+                case "Пн": return Weekday.monday
+                case "Вт": return Weekday.tuesday
+                case "Ср": return Weekday.wednesday
+                case "Чт": return Weekday.thursday
+                case "Пт": return Weekday.friday
+                case "Сб": return Weekday.saturday
+                case "Вс": return Weekday.sunday
+                default: return nil
+                }
             }
+            
             let daysText = selectedShortDays.joined(separator: ", ")
             self?.scheduleButton.setTitle("Расписание: \(daysText)", for: .normal)
         }
         
         present(scheduleVC, animated: true, completion: nil)
     }
+
     
     @objc func cancelButtonTapped() {
         dismiss(animated: true, completion: nil)
