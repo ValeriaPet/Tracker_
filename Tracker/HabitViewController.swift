@@ -1,10 +1,10 @@
 import UIKit
 
-class HabitViewController: UIViewController {
+class HabitViewController: UIViewController, UITextFieldDelegate {
     
     let scheduleButton = UIButton(type: .system)
     let categoryButton = UIButton(type: .system)
-    let nameTextField = UITextField()  // Обычный UITextField
+    let nameTextField = UITextField()
     let createButton = UIButton(type: .system)
     let cancelButton = UIButton(type: .system)
     
@@ -17,6 +17,20 @@ class HabitViewController: UIViewController {
         view.backgroundColor = .white
         setupUI()
         setupObservers()
+        
+        nameTextField.delegate = self
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(hideKeyboard))
+        view.addGestureRecognizer(tapGesture)
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder() 
+        return true
+    }
+
+    @objc func hideKeyboard() {
+        view.endEditing(true)
     }
     
     func setupUI() {
@@ -172,6 +186,7 @@ class HabitViewController: UIViewController {
         categorySelectionVC.modalPresentationStyle = .pageSheet
         present(categorySelectionVC, animated: true, completion: nil)
     }
+
     
     @objc func scheduleButtonTapped() {
         let scheduleVC = ScheduleViewController()
@@ -193,10 +208,12 @@ class HabitViewController: UIViewController {
             
             let daysText = selectedShortDays.joined(separator: ", ")
             self?.scheduleButton.setTitle("Расписание: \(daysText)", for: .normal)
+            self?.updateCreateButtonState()
         }
         
         present(scheduleVC, animated: true, completion: nil)
     }
+
 
     
     @objc func cancelButtonTapped() {
@@ -220,10 +237,12 @@ class HabitViewController: UIViewController {
         onCreateTracker?(newCategory)
         dismiss(animated: true, completion: nil)
     }
+
     
     private func updateCreateButtonState() {
         let isFormValid = !nameTextField.text!.isEmpty && !selectedCategory.isEmpty && !selectedSchedule.isEmpty
         createButton.isEnabled = isFormValid
         createButton.backgroundColor = isFormValid ? .black : .lightGray
     }
+
 }

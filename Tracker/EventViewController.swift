@@ -1,7 +1,7 @@
 import Foundation
 import UIKit
 
-class EventViewController: UIViewController {
+class EventViewController: UIViewController, UITextFieldDelegate {
     
     let categoryButton = UIButton(type: .system)
     let nameTextField = UITextField()
@@ -16,6 +16,20 @@ class EventViewController: UIViewController {
         view.backgroundColor = .white
         setupUI()
         setupObservers()
+        
+        nameTextField.delegate = self
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(hideKeyboard))
+        view.addGestureRecognizer(tapGesture)
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder() 
+        return true
+    }
+
+    @objc func hideKeyboard() {
+        view.endEditing(true)
     }
     
     func setupUI() {

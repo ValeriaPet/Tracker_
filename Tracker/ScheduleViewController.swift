@@ -70,7 +70,7 @@ final class ScheduleViewController: UIViewController, UITableViewDelegate, UITab
             
             doneButton.topAnchor.constraint(equalTo: containerView.bottomAnchor, constant: 24),
             doneButton.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
-            doneButton.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            doneButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
             doneButton.heightAnchor.constraint(equalToConstant: 60),
             doneButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
         ])
