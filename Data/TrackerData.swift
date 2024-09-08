@@ -9,14 +9,14 @@ struct TrackerData {
             TrackerCategory(name: "Happy House", trackers: [
                 Tracker(id: UUID(),
                         title: "Поливать кактус",
-                        color: .colorSelection3,
+                        color: .color3,
                         emoji: "🌱",
                         schedule: [.monday, .wednesday, .friday],
                         creationDate: today),
                 
                 Tracker(id: UUID(),
                         title: "Проклинать Куроо Тецуро",
-                        color: .colorSelection11,
+                        color: .color11,
                         emoji: "😈",
                         schedule: [.monday, .tuesday, .wednesday],
                         creationDate: today)
@@ -24,14 +24,14 @@ struct TrackerData {
             TrackerCategory(name: "Favorite things", trackers: [
                 Tracker(id: UUID(),
                         title: "Погладить кошку 500 раз",
-                        color: .colorSelection1,
+                        color: .color1,
                         emoji: "🐱",
                         schedule: [.tuesday, .thursday],
                         creationDate: today),
                 
                 Tracker(id: UUID(),
                         title: "Попить кофе",
-                        color: .colorSelection15,
+                        color: .color15,
                         emoji: "☕️",
                         schedule: [.saturday, .sunday],
                         creationDate: today)

@@ -20,6 +20,7 @@ struct Tracker {
     let creationDate: Date
 }
 
+
 struct TrackerCategory {
     let name: String
     var trackers: [Tracker]
