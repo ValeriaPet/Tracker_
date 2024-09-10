@@ -26,7 +26,7 @@ final class EmojiCollectionCell: UICollectionViewCell {
         backgroundCellView.translatesAutoresizingMaskIntoConstraints = false
         self.contentView.addSubview(backgroundCellView)
         
-        emojiLabel.font = UIFont.systemFont(ofSize: 54)
+        emojiLabel.font = UIFont.systemFont(ofSize: 28)
         emojiLabel.textAlignment = .center
         emojiLabel.translatesAutoresizingMaskIntoConstraints = false
         self.contentView.addSubview(emojiLabel)
