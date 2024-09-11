@@ -33,6 +33,7 @@ class EventViewController: UIViewController, UITextFieldDelegate, UICollectionVi
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(hideKeyboard))
         view.addGestureRecognizer(tapGesture)
+        tapGesture.cancelsTouchesInView = false
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {

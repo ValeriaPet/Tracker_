@@ -16,7 +16,7 @@ final class EmojiCollectionCell: UICollectionViewCell {
     
     func configure(withEmoji emoji: String, isSelected: Bool) {
         emojiLabel.text = emoji
-        backgroundCellView.backgroundColor = isSelected ? .lightGray.withAlphaComponent(1) : .clear
+        backgroundCellView.backgroundColor = isSelected ? .lightGray1.withAlphaComponent(1) : .clear
     }
     
     private func setupUI() {

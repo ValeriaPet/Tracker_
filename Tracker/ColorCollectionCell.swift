@@ -17,10 +17,11 @@ final class ColorCollectionCell: UICollectionViewCell {
     func configure(withColor color: UIColor, isSelected: Bool) {
         // Устанавливаем цвет из ассетов
         colorView.backgroundColor = color
-        // Если выбран цвет, добавляем рамку, если нет, то убираем ее
-        backgroundCellView.layer.borderColor = isSelected ? UIColor.black.cgColor : UIColor.clear.cgColor
+        
+        backgroundCellView.layer.borderColor = isSelected ? color.withAlphaComponent(0.3).cgColor : UIColor.clear.cgColor
         backgroundCellView.layer.borderWidth = isSelected ? 2 : 0
     }
+
 
 
     private func setupUI() {
