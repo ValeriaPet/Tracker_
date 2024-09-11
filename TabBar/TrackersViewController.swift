@@ -1,4 +1,5 @@
 import UIKit
+import CoreData
 
 final class TrackersViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, TrackerCollectionViewCellDelegate {
     
@@ -20,9 +21,15 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
     private var stubImageView = UIImageView()
     private var imageLabel = UILabel()
     
+    private var context: NSManagedObjectContext!
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
+        
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        context = appDelegate.persistentContainer.viewContext
         
         setupNavigationBar()
         setupPlusButton()
@@ -183,9 +190,35 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
         ])
     }
     
+    //    private func loadTrackers() {
+    //        categories = TrackerData.getTrackerCategories()
+    //        filterTrackers(by: currentDate)
+    //    }
+    
     private func loadTrackers() {
-        categories = TrackerData.getTrackerCategories()
-        filterTrackers(by: currentDate)
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        
+        do {
+            let trackerCoreDataArray = try context.fetch(fetchRequest)
+            
+            // Преобразуем TrackerCoreData в массив Tracker
+            categories = trackerCoreDataArray.map { trackerCoreData in
+                let tracker = Tracker(
+                    id: UUID(),
+                    title: trackerCoreData.title ?? "",
+                    color: trackerCoreData.color as! UIColor,
+                    emoji: trackerCoreData.emoji ?? "",
+                    schedule: (trackerCoreData.schedule as? [Weekday]) ?? [],
+                    creationDate: trackerCoreData.creationDate ?? Date()
+                )
+                
+                let categoryName = trackerCoreData.category?.name ?? "Без категории"
+                return TrackerCategory(name: categoryName, trackers: [tracker])
+            }
+            
+        } catch {
+            print("Failed to fetch trackers: \(error)")
+        }
     }
     
     func isTrackerCompletedToday(_ tracker: Tracker) -> Bool {
@@ -219,7 +252,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
         currentDate = sender.date
         collectionView.reloadData()
     }
-
+    
     // MARK: - UICollectionViewDataSource
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
@@ -234,18 +267,18 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TrackerCollectionViewCell.reuseIdentifier, for: indexPath) as? TrackerCollectionViewCell else {
             return UICollectionViewCell()
         }
-
+        
         let tracker = filteredTrackerCategories[indexPath.section].trackers[indexPath.item]
         cell.tracker = tracker
         cell.delegate = self
-
+        
         // Обновляем состояние кнопки
         cell.updateButtonAppearance()
         cell.updateDaysCompleted()
-
+        
         return cell
     }
-
+    
     // MARK: - UICollectionViewDelegateFlowLayout
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -278,40 +311,96 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
         return completedTrackers.filter { $0.trackerID == tracker.id }.count
     }
     
+    //    func didCompleteTracker(_ cell: TrackerCollectionViewCell, tracker: Tracker, isCompleted: Bool) {
+    //        guard let indexPath = collectionView.indexPath(for: cell) else { return }
+    //
+    //        if currentDate > Date() {return}
+    //        let record = TrackerRecord(trackerID: tracker.id, date: currentDate)
+    //        if isCompleted {
+    //            completedTrackers.insert(record)
+    //        } else {
+    //            completedTrackers.remove(record)
+    //        }
+    //
+    //        cell.updateButtonAppearance()
+    //        cell.updateDaysCompleted()
+    //
+    //        collectionView.reloadItems(at: [indexPath])
+    //    }
+    
     func didCompleteTracker(_ cell: TrackerCollectionViewCell, tracker: Tracker, isCompleted: Bool) {
         guard let indexPath = collectionView.indexPath(for: cell) else { return }
-
-        // Проверяем, если выбранная дата является будущей
+        
         if currentDate > Date() {
             return // Не разрешаем отмечать трекер для будущего времени
         }
-
-        let record = TrackerRecord(trackerID: tracker.id, date: currentDate)
         
-        if isCompleted {
-            completedTrackers.insert(record)
-        } else {
-            completedTrackers.remove(record)
+        let record = TrackerRecordCoreData(context: context)
+        record.date = currentDate
+        record.isCompleted = isCompleted
+        record.tracker = fetchCoreDataTracker(by: tracker.id) // Найдите трекер в Core Data по идентификатору
+        
+        do {
+            try context.save()
+        } catch {
+            print("Failed to save tracker record: \(error)")
         }
         
-        // Обновляем внешний вид ячейки
-        cell.updateButtonAppearance()
-        cell.updateDaysCompleted()
-        
-        // Перезагружаем только изменённую ячейку
+        // Обновляем отображение
         collectionView.reloadItems(at: [indexPath])
     }
-
+    
+    private func fetchCoreDataTracker(by id: UUID) -> TrackerCoreData? {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        
+        do {
+            let trackers = try context.fetch(fetchRequest)
+            return trackers.first
+        } catch {
+            print("Failed to fetch tracker: \(error)")
+            return nil
+        }
+    }
+    
+    
     // MARK: - Adding new tracker to the selected category
     
+    //    private func addNewTrackerCategory(_ newCategory: TrackerCategory) {
+    //        if let existingCategoryIndex = categories.firstIndex(where: { $0.name == newCategory.name }) {
+    //            categories[existingCategoryIndex].trackers.append(contentsOf: newCategory.trackers)
+    //        } else {
+    //            categories.append(newCategory)
+    //        }
+    //
+    //        filterTrackers(by: currentDate)
+    //        collectionView.reloadData()
+    //    }
+    //
     private func addNewTrackerCategory(_ newCategory: TrackerCategory) {
-        if let existingCategoryIndex = categories.firstIndex(where: { $0.name == newCategory.name }) {
-            categories[existingCategoryIndex].trackers.append(contentsOf: newCategory.trackers)
-        } else {
-            categories.append(newCategory)
+        for tracker in newCategory.trackers {
+            // Создаем объект сущности для трекера в Core Data
+            let trackerCoreData = TrackerCoreData(context: context)
+            trackerCoreData.title = tracker.title
+            trackerCoreData.color = tracker.color
+            trackerCoreData.creationDate = tracker.creationDate
+            
+            // Связь с категорией
+            let categoryCoreData = TrackerCategoryCoreData(context: context)
+            categoryCoreData.name = newCategory.name
+            trackerCoreData.category = categoryCoreData
+            
+            do {
+                try context.save()
+            } catch {
+                print("Failed to save new tracker: \(error)")
+            }
         }
         
+        // Обновляем отображение
+        loadTrackers()
         filterTrackers(by: currentDate)
         collectionView.reloadData()
     }
+    
 }

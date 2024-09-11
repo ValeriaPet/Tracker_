@@ -22,7 +22,7 @@ struct Tracker {
 
 
 struct TrackerCategory {
-    let name: String
+    var name: String
     var trackers: [Tracker]
 }
 
@@ -42,7 +42,7 @@ struct TrackerRecord: Hashable {
 
 // MARK: - Перечисление дней недели
 
-enum Weekday: Int, CaseIterable {
+enum Weekday: Int, CaseIterable, Codable {
     case sunday
     case monday = 1
     case tuesday
