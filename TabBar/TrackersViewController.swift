@@ -189,12 +189,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
-    
-    //    private func loadTrackers() {
-    //        categories = TrackerData.getTrackerCategories()
-    //        filterTrackers(by: currentDate)
-    //    }
-    
+
     private func loadTrackers() {
         let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
         
@@ -206,9 +201,9 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
                 let tracker = Tracker(
                     id: UUID(),
                     title: trackerCoreData.title ?? "",
-                    color: trackerCoreData.color as! UIColor,
+                    color: UIColor(fromInt16: trackerCoreData.color as! Int16),
                     emoji: trackerCoreData.emoji ?? "",
-                    schedule: (trackerCoreData.schedule as? [Weekday]) ?? [],
+                    schedule: trackerCoreData.schedule?.selectedDays ?? [],
                     creationDate: trackerCoreData.creationDate ?? Date()
                 )
                 
@@ -311,22 +306,6 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
         return completedTrackers.filter { $0.trackerID == tracker.id }.count
     }
     
-    //    func didCompleteTracker(_ cell: TrackerCollectionViewCell, tracker: Tracker, isCompleted: Bool) {
-    //        guard let indexPath = collectionView.indexPath(for: cell) else { return }
-    //
-    //        if currentDate > Date() {return}
-    //        let record = TrackerRecord(trackerID: tracker.id, date: currentDate)
-    //        if isCompleted {
-    //            completedTrackers.insert(record)
-    //        } else {
-    //            completedTrackers.remove(record)
-    //        }
-    //
-    //        cell.updateButtonAppearance()
-    //        cell.updateDaysCompleted()
-    //
-    //        collectionView.reloadItems(at: [indexPath])
-    //    }
     
     func didCompleteTracker(_ cell: TrackerCollectionViewCell, tracker: Tracker, isCompleted: Bool) {
         guard let indexPath = collectionView.indexPath(for: cell) else { return }
@@ -366,23 +345,13 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
     
     // MARK: - Adding new tracker to the selected category
     
-    //    private func addNewTrackerCategory(_ newCategory: TrackerCategory) {
-    //        if let existingCategoryIndex = categories.firstIndex(where: { $0.name == newCategory.name }) {
-    //            categories[existingCategoryIndex].trackers.append(contentsOf: newCategory.trackers)
-    //        } else {
-    //            categories.append(newCategory)
-    //        }
-    //
-    //        filterTrackers(by: currentDate)
-    //        collectionView.reloadData()
-    //    }
-    //
+
     private func addNewTrackerCategory(_ newCategory: TrackerCategory) {
         for tracker in newCategory.trackers {
             // Создаем объект сущности для трекера в Core Data
             let trackerCoreData = TrackerCoreData(context: context)
             trackerCoreData.title = tracker.title
-            trackerCoreData.color = tracker.color
+            trackerCoreData.color = UIColor(fromInt16: trackerCoreData.color as! Int16)
             trackerCoreData.creationDate = tracker.creationDate
             
             // Связь с категорией
