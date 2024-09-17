@@ -18,12 +18,14 @@ final class TrackerStore {
         trackerCoreData.id = tracker.id
         trackerCoreData.creationDate = tracker.creationDate
         trackerCoreData.title = tracker.title
-        trackerCoreData.color = UIColor(fromInt16: trackerCoreData.color as! Int16) // Преобразование цвета
-        trackerCoreData.emoji = tracker.emoji  // Сохранение emoji как строки
-        trackerCoreData.schedule = tracker.schedule.asString  // Преобразование массива Weekday в строку
-
+        trackerCoreData.color =  UIColor(named: trackerCoreData.color as? String ?? "") ?? UIColor.clear
+        
+        trackerCoreData.emoji = tracker.emoji
+        trackerCoreData.schedule = tracker.schedule.map { "\($0.rawValue)" }.joined(separator: ",")
+        
         return trackerCoreData
     }
+
     
     func allTrackersCount() -> Int {
         let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")

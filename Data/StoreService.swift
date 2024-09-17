@@ -105,7 +105,7 @@ final class StoreService: NSObject {
         delegate?.updateStub()
     }
     
-    /// добавляем в базу категории без трекеров
+  
     func addCategoriesToStore(newlist: Set<String>) {
         let newCategories = newlist.subtracting(self.categoryList)
         
@@ -166,7 +166,7 @@ extension StoreService: NSFetchedResultsControllerDelegate {
             title: trackerCoreData.title ?? "",
             color: UIColor(fromInt16: trackerCoreData.color as! Int16),
             emoji: trackerCoreData.emoji ?? "🙂",
-            schedule: trackerCoreData.schedule?.selectedDays ?? [],  // Преобразование строки обратно в массив Weekday
+            schedule: trackerCoreData.schedule?.selectedDays ?? [],
             creationDate: trackerCoreData.creationDate ?? Date()
         )
     }

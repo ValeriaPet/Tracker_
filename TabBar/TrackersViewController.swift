@@ -201,7 +201,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
                 let tracker = Tracker(
                     id: UUID(),
                     title: trackerCoreData.title ?? "",
-                    color: UIColor(fromInt16: trackerCoreData.color as! Int16),
+                    color: UIColor(named: trackerCoreData.color as? String ?? "") ?? UIColor.clear,
                     emoji: trackerCoreData.emoji ?? "",
                     schedule: trackerCoreData.schedule?.selectedDays ?? [],
                     creationDate: trackerCoreData.creationDate ?? Date()
@@ -314,11 +314,17 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
             return // Не разрешаем отмечать трекер для будущего времени
         }
         
+        // Найдите трекер в Core Data по идентификатору
+        guard let coreDataTracker = fetchCoreDataTracker(by: tracker.id) else {
+            print("Tracker not found in Core Data")
+            return
+        }
+        
         let record = TrackerRecordCoreData(context: context)
         record.date = currentDate
         record.isCompleted = isCompleted
-        record.tracker = fetchCoreDataTracker(by: tracker.id) // Найдите трекер в Core Data по идентификатору
-        
+        record.uuid = coreDataTracker.id
+
         do {
             try context.save()
         } catch {
@@ -328,6 +334,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
         // Обновляем отображение
         collectionView.reloadItems(at: [indexPath])
     }
+
     
     private func fetchCoreDataTracker(by id: UUID) -> TrackerCoreData? {
         let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
@@ -350,8 +357,9 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
         for tracker in newCategory.trackers {
             // Создаем объект сущности для трекера в Core Data
             let trackerCoreData = TrackerCoreData(context: context)
+            trackerCoreData.id = tracker.id
             trackerCoreData.title = tracker.title
-            trackerCoreData.color = UIColor(fromInt16: trackerCoreData.color as! Int16)
+            trackerCoreData.color = tracker.color
             trackerCoreData.creationDate = tracker.creationDate
             
             // Связь с категорией
