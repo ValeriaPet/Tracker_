@@ -89,11 +89,9 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }
 
     private func updateCompletionButton(for tracker: Tracker) {
-        
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         
-        // Отключаем кнопку, если текущая дата больше сегодняшней
         if Calendar.current.compare(tracker.creationDate, to: today, toGranularity: .day) == .orderedDescending {
             completionButton.isEnabled = false
         } else {
@@ -103,7 +101,6 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         guard let isCompleted = delegate?.isTrackerCompletedToday(tracker) else { return }
         let originalColor = tracker.color
         
-        // Установка иконок
         let imageConfig = UIImage.SymbolConfiguration(pointSize: 12, weight: .bold)
         let checkmarkImage = UIImage(systemName: "checkmark", withConfiguration: imageConfig)
         let plusImage = UIImage(systemName: "plus", withConfiguration: imageConfig)
@@ -133,7 +130,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         delegate?.didCompleteTracker(self, tracker: tracker, isCompleted: !isCompleted)
     }
 
-    // Функция для склонения слова "день"
+
     private func setStringFor(_ count: Int) -> String {
         let days = count % 10
         switch days {

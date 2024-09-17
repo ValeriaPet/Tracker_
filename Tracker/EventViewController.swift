@@ -217,10 +217,9 @@ class EventViewController: UIViewController, UITextFieldDelegate, UICollectionVi
         let categorySelectionVC = CategorySelectionViewController()
         categorySelectionVC.onCategorySelected = { [weak self] selectedCategory in
             self?.selectedCategory = selectedCategory
-            self?.categoryButton.setTitle("Категория \(selectedCategory)", for: .normal)
+            self?.categoryButton.setTitle("Категория: \(selectedCategory)", for: .normal)
             self?.updateCreateButtonState()
         }
-        categorySelectionVC.modalPresentationStyle = .pageSheet
         present(categorySelectionVC, animated: true, completion: nil)
     }
     
@@ -229,32 +228,29 @@ class EventViewController: UIViewController, UITextFieldDelegate, UICollectionVi
     }
     
     @objc private func createButtonTapped() {
-        guard let name = nameTextField.text, !name.isEmpty else {
-            return
-        }
-        
-        guard let selectedEmoji = selectedEmoji, let selectedColor = selectedColor else {
-            return
-        }
-        
+        guard let name = nameTextField.text, !name.isEmpty else { return }
+        guard let selectedEmoji = selectedEmoji, let selectedColor = selectedColor else { return }
+
+        // Устанавливаем текущую дату создания
         let newTracker = Tracker(id: UUID(),
                                  title: name,
                                  color: UIColor(named: "Color\(selectedColor)")!,
-                                 emoji: getEmojiForIndex(selectedEmoji),
-                                 schedule: [], // Нерегулярные события не имеют расписания
-                                 creationDate: Date())
-        
+                                 emoji: emojiList[selectedEmoji],
+                                 schedule: [],
+                                 creationDate: Date())  
+
         let newCategory = TrackerCategory(name: selectedCategory, trackers: [newTracker])
-        
+
         onCreateTracker?(newCategory)
         dismiss(animated: true, completion: nil)
     }
+
     
     private func updateCreateButtonState() {
-        let isFormValid = !nameTextField.text!.isEmpty && !selectedCategory.isEmpty && selectedEmoji != nil && selectedColor != nil
-        createButton.isEnabled = isFormValid
-        createButton.backgroundColor = isFormValid ? .black : .lightGray
-    }
+         let isFormValid = !nameTextField.text!.isEmpty && !selectedCategory.isEmpty && selectedEmoji != nil && selectedColor != nil
+         createButton.isEnabled = isFormValid
+         createButton.backgroundColor = isFormValid ? .black : .lightGray
+     }
     
     private func getEmojiForIndex(_ index: Int) -> String {
         let emojiList = ["😊", "🎉", "💀", "😎", "😇", "😄", "💖", "🚀", "🎨", "🎁", "👑", "💪", "🤖", "🎸", "🌈", "🔥", "🍕", "🍔"]
@@ -268,15 +264,13 @@ class EventViewController: UIViewController, UITextFieldDelegate, UICollectionVi
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if collectionView == emojiCollectionView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "emojiCell", for: indexPath) as! EmojiCollectionCell
-            let emoji = emojiList[indexPath.item] // Получаем emoji как строку
-            cell.configure(withEmoji: emoji, isSelected: selectedEmoji == indexPath.item) // Передаем строку
+            let emoji = emojiList[indexPath.item]
+            cell.configure(withEmoji: emoji, isSelected: selectedEmoji == indexPath.item)
             return cell
-            
         } else {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "colorCell", for: indexPath) as! ColorCollectionCell
             let color = colorNames[indexPath.item]
             cell.configure(withColor: color, isSelected: selectedColor == indexPath.item)
-            
             return cell
         }
     }
