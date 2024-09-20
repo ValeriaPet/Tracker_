@@ -1,23 +1,23 @@
 import UIKit
 
-final class TrackersViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, TrackerCollectionViewCellDelegate {
+final class TrackersViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, TrackerCollectionViewCellDelegate, UICollectionViewDelegateFlowLayout {
     
     private let trackerStore = TrackerStore()
     private let categoryStore = CategoryStore()
     private let trackerRecordStore = TrackerRecordStore()
     
-    private var categories: [TrackerCategory] = []
-    private var filteredTrackerCategories: [TrackerCategory] = []
-    private var completedTrackers: [TrackerRecord] = []
-  
-    private var searchBar = UISearchBar()
-    private var label = UILabel()
-    private var plusButton = UIButton()
-    private var datePicker = UIDatePicker()
-    private var currentDate = Date()
-    private var iconImageView = UIView()
-    private var stubImageView = UIImageView()
-    private var imageLabel = UILabel()
+    var categories: [TrackerCategory] = []
+    var filteredTrackerCategories: [TrackerCategory] = []
+    var completedTrackers: Set<TrackerRecord> = []
+    
+    var searchBar = UISearchBar()
+    var label = UILabel()
+    var plusButton = UIButton()
+    var datePicker = UIDatePicker()
+    var currentDate = Date()
+    var iconImageView = UIView()
+    var stubImageView = UIImageView()
+    var imageLabel = UILabel()
     
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -124,7 +124,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
         
         NSLayoutConstraint.activate([
             datePicker.heightAnchor.constraint(equalToConstant: 34),
-            datePicker.widthAnchor.constraint(equalToConstant: 77),
+            //            datePicker.widthAnchor.constraint(equalToConstant: 77),
             datePicker.bottomAnchor.constraint(equalTo: searchBar.topAnchor, constant: -53),
             datePicker.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 282),
             datePicker.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16)
@@ -189,23 +189,23 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
-
+    
     private func loadTrackers() {
         let storedTrackers = trackerStore.fetchTrackers()
+        print("Loaded trackers: \(storedTrackers)")
         let storedCategories = categoryStore.fetchAllCategories()
+        print("Loaded categories: \(storedCategories)")
         let storedRecords = trackerRecordStore.fetchAllRecords()
-
-        completedTrackers = storedRecords
-
+        completedTrackers = Set(storedRecords)
+        print("Loaded records: \(storedRecords)")
+        
         if !storedCategories.isEmpty {
             categories = storedCategories
-        } else if !storedTrackers.isEmpty {
-            let defaultCategory = TrackerCategory(name: "Default", trackers: storedTrackers)
-            categories = [defaultCategory]
+            
+            filteredTrackerCategories = categories
+            filterTrackers(by: currentDate)
+            collectionView.reloadData()
         }
-
-        filteredTrackerCategories = categories
-        collectionView.reloadData()
     }
     
     func isTrackerCompletedToday(_ tracker: Tracker) -> Bool {
@@ -213,12 +213,12 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
             Calendar.current.isDate(record.date, inSameDayAs: Date()) && record.trackerID == tracker.id
         }
     }
-
+    
     private func filterTrackers(by date: Date) {
         let calendar = Calendar.current
         let weekday = calendar.component(.weekday, from: date) - 1
         guard let weekdayEnum = Weekday(rawValue: Weekday.allCases[weekday].rawValue) else { return }
-
+        
         filteredTrackerCategories = categories.map { category in
             let filteredTrackers = category.trackers.filter { tracker in
                 if tracker.schedule.isEmpty {
@@ -228,11 +228,11 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
             }
             return TrackerCategory(name: category.name, trackers: filteredTrackers)
         }.filter { !$0.trackers.isEmpty }
-
+        
         collectionView.reloadData()
         updateIconVisibility()
+        
     }
-
     
     private func updateIconVisibility() {
         iconImageView.isHidden = !filteredTrackerCategories.isEmpty
@@ -244,15 +244,15 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
     }
     
     // MARK: - UICollectionViewDataSource
-
+    
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return filteredTrackerCategories.count
     }
-
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return filteredTrackerCategories[section].trackers.count
     }
-
+    
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TrackerCollectionViewCell.reuseIdentifier, for: indexPath) as? TrackerCollectionViewCell else {
             return UICollectionViewCell()
@@ -262,8 +262,8 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
         cell.delegate = self
         return cell
     }
-
-
+    
+    
     // MARK: - UICollectionViewDelegateFlowLayout
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -295,35 +295,35 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
     func totalCompletions(for tracker: Tracker) -> Int {
         return completedTrackers.filter { $0.trackerID == tracker.id }.count
     }
-
+    
     func didCompleteTracker(_ cell: TrackerCollectionViewCell, tracker: Tracker, isCompleted: Bool) {
-        if isCompleted {
-            let newRecord = TrackerRecord(trackerID: tracker.id, date: Date())
-            trackerRecordStore.addNewRecord(from: newRecord, isCompleted: true)
-        } else {
-            let recordToDelete = TrackerRecord(trackerID: tracker.id, date: Date())
-            trackerRecordStore.deleteRecord(for: recordToDelete)
+        guard let indexPath = collectionView.indexPath(for: cell) else { return }
+        if currentDate > Date() {
+            return
         }
+        
+        let record = TrackerRecord(trackerID: tracker.id, date: currentDate)
+        if isCompleted {
+            completedTrackers.insert(record)
+        } else {
+            completedTrackers.remove(record)
+        }
+        
+        cell.updateButtonAppearance()
+        cell.updateDaysCompleted()
+        
+        collectionView.reloadItems(at: [indexPath])
+    }
+    
+    private func addNewTrackerCategory(_ newCategory: TrackerCategory) {
+        if let existingCategoryIndex = categories.firstIndex(where: { $0.name == newCategory.name }) {
+            categories[existingCategoryIndex].trackers.append(contentsOf: newCategory.trackers)
+        } else {
+            categories.append(newCategory)
+        }
+        
+        filterTrackers(by: currentDate)
         collectionView.reloadData()
     }
-
-    private func addNewTrackerCategory(_ newCategory: TrackerCategory) {
-        do {
-            let categoryCoreData = categoryStore.fetchOrCreateCategory(with: newCategory.name)
-
-            for tracker in newCategory.trackers {
-                do {
-                    try trackerStore.addNewTracker(tracker, to: categoryCoreData)
-                } catch {
-                    print("Error adding tracker: \(error)")
-                }
-            }
-
-            loadTrackers()
-            filterTrackers(by: currentDate)
-            collectionView.reloadData()
-        } catch {
-            print("Error creating category and adding trackers: \(error)")
-        }
-    }
+    
 }

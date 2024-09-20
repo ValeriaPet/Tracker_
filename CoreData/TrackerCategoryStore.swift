@@ -26,13 +26,9 @@ final class CategoryStore: NSObject {
 }
 
 extension CategoryStore {
-    /// Добавление трекера в существующую категорию
     func addTrackerToCategory(_ tracker: Tracker, in category: TrackerCategoryCoreData) {
         do {
-            // Добавляем трекер и связываем его с категорией
             try trackerStore.addNewTracker(tracker, to: category)
-            
-            // Сохраняем изменения
             try context.save()
         } catch {
             print("Failed to add tracker to category: \(error)")
@@ -68,13 +64,8 @@ extension CategoryStore {
 
     func createOrAddTrackerToCategory(_ tracker: Tracker, with titleCategory: String) {
         do {
-            // Находим или создаем категорию
             let category = fetchOrCreateCategory(with: titleCategory)
-            
-            // Добавляем трекер и связываем его с категорией
             try trackerStore.addNewTracker(tracker, to: category)
-            
-            // Сохраняем изменения
             try context.save()
         } catch {
             print("Failed to add tracker to category: \(error)")
@@ -124,15 +115,12 @@ extension CategoryStore {
 
 
     func fetchOrCreateCategory(with title: String) -> TrackerCategoryCoreData {
-        // Попытка найти существующую категорию
         if let existingCategory = fetchCategory(with: title) {
             return existingCategory
         } else {
-            // Если категория не найдена, создаём новую
             return createCategoryEntity(with: title)
         }
     }
-
 
     private func fetchCategory(with title: String) -> TrackerCategoryCoreData? {
         let fetchRequest = NSFetchRequest<TrackerCategoryCoreData>(entityName: "TrackerCategoryCoreData")

@@ -5,18 +5,19 @@ import CoreData
 final class WeekdayValueTransformer: ValueTransformer {
     
     override class func transformedValueClass() -> AnyClass { NSData.self }
-    
+
     override class func allowsReverseTransformation() -> Bool { true }
         
+
     override func transformedValue(_ value: Any?) -> Any? {
         guard let weekdays = value as? [Weekday] else { return nil }
-        let strings = weekdays.map { $0.rawValue }
-        return try? NSKeyedArchiver.archivedData(withRootObject: strings, requiringSecureCoding: false)
+        let ints = weekdays.map { $0.rawValue }  
+        return try? NSKeyedArchiver.archivedData(withRootObject: ints, requiringSecureCoding: false)
     }
-    
+
     override func reverseTransformedValue(_ value: Any?) -> Any? {
         guard let data = value as? Data,
-              let strings = try? NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? [String] else { return nil }
-        return strings.compactMap { Weekday(rawValue: $0) }
+              let ints = try? NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? [Int] else { return nil }
+        return ints.compactMap { Weekday(rawValue: $0) }
     }
 }

@@ -230,14 +230,19 @@ class EventViewController: UIViewController, UITextFieldDelegate, UICollectionVi
     @objc private func createButtonTapped() {
         guard let name = nameTextField.text, !name.isEmpty else { return }
         guard let selectedEmoji = selectedEmoji, let selectedColor = selectedColor else { return }
+        
+        let emoji = emojiList[selectedEmoji]
+        let color = colorNames[selectedColor]
+        
 
         // Устанавливаем текущую дату создания
-        let newTracker = Tracker(id: UUID(),
-                                 title: name,
-                                 color: UIColor(named: "Color\(selectedColor)")!,
-                                 emoji: emojiList[selectedEmoji],
-                                 schedule: [],
-                                 creationDate: Date())  
+        let newTracker = Tracker(
+            id: UUID(),
+            title: name,
+            color: color,
+            emoji: emoji,
+            schedule: [],
+            creationDate: Date())
 
         let newCategory = TrackerCategory(name: selectedCategory, trackers: [newTracker])
 
@@ -252,13 +257,9 @@ class EventViewController: UIViewController, UITextFieldDelegate, UICollectionVi
          createButton.backgroundColor = isFormValid ? .black : .lightGray
      }
     
-    private func getEmojiForIndex(_ index: Int) -> String {
-        let emojiList = ["😊", "🎉", "💀", "😎", "😇", "😄", "💖", "🚀", "🎨", "🎁", "👑", "💪", "🤖", "🎸", "🌈", "🔥", "🍕", "🍔"]
-        return emojiList[index % emojiList.count]
-    }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 18
+        return collectionView == emojiCollectionView ? emojiList.count : colorNames.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {

@@ -22,7 +22,7 @@ class HabitViewController: UIViewController, UITextFieldDelegate, UICollectionVi
     var selectedColor: Int?
     
     private let emojiList = ["😊", "🎉", "💀", "😎", "😇", "😄", "💖", "🚀", "🎨", "🎁", "👑", "💪", "🤖", "🎸", "🌈", "🔥", "🍕", "🍔"]
-    private let colorNames: [UIColor] = (1...18).compactMap { UIColor(named: "Color\($0)") } // Цвета
+    private let colorNames: [UIColor] = (1...18).compactMap { UIColor(named: "Color\($0)") }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -64,7 +64,7 @@ class HabitViewController: UIViewController, UITextFieldDelegate, UICollectionVi
             contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
             contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
             contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
-            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor) // фиксируем ширину contentView
+            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor)
         ])
         
         // Заголовок
@@ -309,8 +309,7 @@ class HabitViewController: UIViewController, UITextFieldDelegate, UICollectionVi
         guard let selectedEmoji = selectedEmoji, let selectedColor = selectedColor else {
             return
         }
-        
-        // Создаем новый трекер
+
         let emoji = emojiList[selectedEmoji]
         let color = colorNames[selectedColor]
         
@@ -342,8 +341,8 @@ class HabitViewController: UIViewController, UITextFieldDelegate, UICollectionVi
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if collectionView == emojiCollectionView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "emojiCell", for: indexPath) as! EmojiCollectionCell
-            let emoji = emojiList[indexPath.item] // Получаем emoji как строку
-            cell.configure(withEmoji: emoji, isSelected: selectedEmoji == indexPath.item) // Передаем строку
+            let emoji = emojiList[indexPath.item]
+            cell.configure(withEmoji: emoji, isSelected: selectedEmoji == indexPath.item)
             return cell
             
         } else {
@@ -362,7 +361,7 @@ class HabitViewController: UIViewController, UITextFieldDelegate, UICollectionVi
             selectedColor = indexPath.item
         }
         collectionView.reloadData()
-        updateCreateButtonState() // Обновляем состояние кнопки
+        updateCreateButtonState()
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {

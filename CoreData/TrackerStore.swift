@@ -3,21 +3,19 @@ import Foundation
 import CoreData
 import UIKit
 
-
 final class TrackerStore {
     
-
     private let context: NSManagedObjectContext
     
     convenience init() {
         let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
         self.init(context: context)
     }
-
+    
     init(context: NSManagedObjectContext) {
         self.context = context
     }
-
+    
     internal func addNewTracker(_ tracker: Tracker, to category: TrackerCategoryCoreData) throws {
         guard let trackerEntity = NSEntityDescription.entity(forEntityName: "TrackerCoreData", in: context) else {
             throw NSError(domain: "TrackerStore", code: 1, userInfo: [NSLocalizedDescriptionKey: "Unable to find entity description"])
@@ -28,19 +26,43 @@ final class TrackerStore {
         newTracker.title = tracker.title
         newTracker.color = UIColorTransform.hexString(from: tracker.color)
         newTracker.emoji = tracker.emoji
-        newTracker.creationDate = tracker.creationDate  // Устанавливаем значение creationDate
-        newTracker.schedule = tracker.schedule.map { $0.rawValue } as NSArray
+        newTracker.creationDate = tracker.creationDate
+    
+        let transformer = WeekdayValueTransformer()
+          if let transformedSchedule = transformer.transformedValue(tracker.schedule) {
+              newTracker.schedule = transformedSchedule as? NSObject  
+          }
 
-        // Устанавливаем категорию
         newTracker.category = category
-
+    
         do {
             try context.save()
         } catch {
             throw error
         }
     }
+}
 
+
+
+extension TrackerStore {
+    private func decodingTracker(from trackerCoreData: TrackerCoreData) -> Tracker? {
+        guard let id = trackerCoreData.id,
+              let title = trackerCoreData.title,
+              let colorHex = trackerCoreData.color,
+              let emoji = trackerCoreData.emoji,
+              let schedule = trackerCoreData.schedule as? [Weekday] else { return nil }
+        
+        let color = UIColorTransform.color(from: colorHex)
+
+        return Tracker(id: id,
+                       title: title,
+                       color: color,
+                       emoji: emoji,
+                       schedule: schedule,
+                       creationDate:  trackerCoreData.creationDate ?? Date())
+    }
+    
     internal func fetchTrackers() -> [Tracker] {
         let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
         do {
@@ -52,29 +74,8 @@ final class TrackerStore {
             return []
         }
     }
-}
-
-extension TrackerStore {
-    private func decodingTracker(from trackerCoreData: TrackerCoreData) -> Tracker? {
-        guard let id = trackerCoreData.id,
-              let title = trackerCoreData.title,
-              let colorHex = trackerCoreData.color,
-              let emoji = trackerCoreData.emoji else { return nil }
-
-        let color = UIColorTransform.color(from: colorHex)
-
-        // Десериализация массива строк обратно в массив Weekday
-        let schedule: [Weekday]
-        if let scheduleArray = trackerCoreData.schedule as? [String] {
-            schedule = scheduleArray.compactMap { Weekday(rawValue: $0) }
-        } else {
-            schedule = []
-        }
-
-        return Tracker(id: id, title: title, color: color, emoji: emoji, schedule: schedule, creationDate: Date())
-    }
-
-
+    
+    
     private func fetchTrackerCoreData(by id: UUID) -> TrackerCoreData? {
         let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
         fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
@@ -87,3 +88,4 @@ extension TrackerStore {
         }
     }
 }
+
