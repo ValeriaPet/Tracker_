@@ -2,9 +2,10 @@ import UIKit
 
 final class TrackersViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, TrackerCollectionViewCellDelegate, UICollectionViewDelegateFlowLayout {
     
-    private let trackerStore = TrackerStore()
+    let trackerStore = TrackerStore()
     private let categoryStore = CategoryStore()
     private let trackerRecordStore = TrackerRecordStore()
+    
     
     var categories: [TrackerCategory] = []
     var filteredTrackerCategories: [TrackerCategory] = []
@@ -56,9 +57,11 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
         let createTrackerVC = EventViewController()
         createTrackerVC.onCreateTracker = { [weak self] newCategory in
             self?.addNewTrackerCategory(newCategory)
+            self?.collectionView.reloadData()
         }
         navigationController?.pushViewController(createTrackerVC, animated: true)
     }
+
     
     private func setupPlusButton() {
         guard let plusButtonImage = UIImage(named: "icadd_tracker") else { return }
@@ -192,21 +195,22 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
     
     private func loadTrackers() {
         let storedTrackers = trackerStore.fetchTrackers()
-        print("Loaded trackers: \(storedTrackers)")
         let storedCategories = categoryStore.fetchAllCategories()
-        print("Loaded categories: \(storedCategories)")
         let storedRecords = trackerRecordStore.fetchAllRecords()
         completedTrackers = Set(storedRecords)
-        print("Loaded records: \(storedRecords)")
         
         if !storedCategories.isEmpty {
             categories = storedCategories
-            
             filteredTrackerCategories = categories
             filterTrackers(by: currentDate)
             collectionView.reloadData()
+            print("Loaded \(categories.count) categories and \(storedTrackers.count) trackers")
+        } else {
+            print("No categories or trackers found")
         }
     }
+
+
     
     func isTrackerCompletedToday(_ tracker: Tracker) -> Bool {
         return completedTrackers.contains { record in
@@ -216,23 +220,25 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
     
     private func filterTrackers(by date: Date) {
         let calendar = Calendar.current
-        let weekday = calendar.component(.weekday, from: date) - 1
-        guard let weekdayEnum = Weekday(rawValue: Weekday.allCases[weekday].rawValue) else { return }
-        
+        let weekdayIndex = calendar.component(.weekday, from: date) - 1
+        guard let weekdayEnum = Weekday(rawValue: Weekday.allCases[weekdayIndex].rawValue) else { return }
+
         filteredTrackerCategories = categories.map { category in
             let filteredTrackers = category.trackers.filter { tracker in
                 if tracker.schedule.isEmpty {
                     return calendar.isDate(tracker.creationDate, inSameDayAs: date)
                 }
-                return tracker.schedule.contains(weekdayEnum) && calendar.compare(tracker.creationDate, to: date, toGranularity: .day) != .orderedDescending
+
+                return tracker.schedule.contains(weekdayEnum) &&
+                       calendar.compare(tracker.creationDate, to: date, toGranularity: .day) != .orderedDescending
             }
             return TrackerCategory(name: category.name, trackers: filteredTrackers)
         }.filter { !$0.trackers.isEmpty }
-        
+
         collectionView.reloadData()
         updateIconVisibility()
-        
     }
+
     
     private func updateIconVisibility() {
         iconImageView.isHidden = !filteredTrackerCategories.isEmpty
@@ -240,8 +246,9 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
     
     @objc private func dateChanged(_ sender: UIDatePicker) {
         currentDate = sender.date
-        collectionView.reloadData()
+        filterTrackers(by: currentDate)  // Фильтруем трекеры по новой дате
     }
+
     
     // MARK: - UICollectionViewDataSource
     
@@ -260,6 +267,10 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
         let tracker = filteredTrackerCategories[indexPath.section].trackers[indexPath.item]
         cell.tracker = tracker
         cell.delegate = self
+        
+        cell.updateButtonAppearance()
+        cell.updateDaysCompleted()
+        
         return cell
     }
     
@@ -303,27 +314,37 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
         }
         
         let record = TrackerRecord(trackerID: tracker.id, date: currentDate)
+        
         if isCompleted {
             completedTrackers.insert(record)
+            trackerRecordStore.addNewRecord(from: record, isCompleted: true)
         } else {
             completedTrackers.remove(record)
         }
-        
         cell.updateButtonAppearance()
         cell.updateDaysCompleted()
         
         collectionView.reloadItems(at: [indexPath])
     }
+
     
-    private func addNewTrackerCategory(_ newCategory: TrackerCategory) {
+    func addNewTrackerCategory(_ newCategory: TrackerCategory) {
         if let existingCategoryIndex = categories.firstIndex(where: { $0.name == newCategory.name }) {
             categories[existingCategoryIndex].trackers.append(contentsOf: newCategory.trackers)
         } else {
             categories.append(newCategory)
         }
-        
+
+        do {
+            categoryStore.createOrAddTrackerToCategory(newCategory.trackers.first!, with: newCategory.name)
+            try trackerStore.context.save()  // Сохраняем изменения
+            print("Successfully saved tracker and category: \(newCategory.name)")
+        } catch {
+            print("Failed to save new tracker or category: \(error)")
+        }
+
         filterTrackers(by: currentDate)
         collectionView.reloadData()
     }
-    
+
 }

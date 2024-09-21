@@ -2,7 +2,7 @@ import Foundation
 
 struct TrackerData {
     static func getTrackerCategories() -> [TrackerCategory] {
-        let calendar = Calendar.current
+        _ = Calendar.current
         let today = Date()
 
         let categories: [TrackerCategory] = [

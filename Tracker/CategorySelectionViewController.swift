@@ -4,7 +4,8 @@ import UIKit
 
 final class CategorySelectionViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
-    private var categories: [String] = ["Happy House", "Favorite things"] // Это можно заменить на реальные данные
+    private var categories: [String] = ["Happy House", "Favorite things"]
+    
  var onCategorySelected: ((String) -> Void)?
     
     private let tableView = UITableView()

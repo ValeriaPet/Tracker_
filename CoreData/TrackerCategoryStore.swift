@@ -10,7 +10,7 @@ protocol CategoryStoreDelegate: AnyObject {
 final class CategoryStore: NSObject {
     
     private weak var delegate: CategoryStoreDelegate?
-    private let context: NSManagedObjectContext
+    private let context: NSManagedObjectContext!
     private let trackerStore: TrackerStore
     
     convenience override init() {
@@ -30,6 +30,7 @@ extension CategoryStore {
         do {
             try trackerStore.addNewTracker(tracker, to: category)
             try context.save()
+            print("Successfully saved tracker to category: \(tracker.title)")
         } catch {
             print("Failed to add tracker to category: \(error)")
         }

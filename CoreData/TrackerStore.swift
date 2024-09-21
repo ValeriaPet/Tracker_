@@ -5,7 +5,7 @@ import UIKit
 
 final class TrackerStore {
     
-    private let context: NSManagedObjectContext
+    let context: NSManagedObjectContext!
     
     convenience init() {
         let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
@@ -27,21 +27,26 @@ final class TrackerStore {
         newTracker.color = UIColorTransform.hexString(from: tracker.color)
         newTracker.emoji = tracker.emoji
         newTracker.creationDate = tracker.creationDate
-    
+        newTracker.category = category
+
         let transformer = WeekdayValueTransformer()
-          if let transformedSchedule = transformer.transformedValue(tracker.schedule) {
-              newTracker.schedule = transformedSchedule as? NSObject  
-          }
+        if let transformedSchedule = transformer.transformedValue(tracker.schedule) {
+            newTracker.schedule = transformedSchedule as? NSObject
+        }
 
         newTracker.category = category
-    
+        category.addToTrackers(newTracker)
+
         do {
             try context.save()
+            print("Successfully saved tracker: \(tracker.title)")
         } catch {
+            print("Error saving tracker: \(error)")
             throw error
         }
     }
 }
+
 
 
 
@@ -50,19 +55,22 @@ extension TrackerStore {
         guard let id = trackerCoreData.id,
               let title = trackerCoreData.title,
               let colorHex = trackerCoreData.color,
-              let emoji = trackerCoreData.emoji,
-              let schedule = trackerCoreData.schedule as? [Weekday] else { return nil }
-        
+              let emoji = trackerCoreData.emoji else { return nil }
+
         let color = UIColorTransform.color(from: colorHex)
+
+        guard let transformedSchedule = trackerCoreData.schedule as? Data else { return nil }
+        let transformer = WeekdayValueTransformer()
+        guard let schedule = transformer.reverseTransformedValue(transformedSchedule) as? [Weekday] else { return nil }
 
         return Tracker(id: id,
                        title: title,
                        color: color,
                        emoji: emoji,
                        schedule: schedule,
-                       creationDate:  trackerCoreData.creationDate ?? Date())
+                       creationDate: trackerCoreData.creationDate ?? Date())
     }
-    
+
     internal func fetchTrackers() -> [Tracker] {
         let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
         do {

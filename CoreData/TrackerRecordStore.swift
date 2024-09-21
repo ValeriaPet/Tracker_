@@ -4,7 +4,7 @@ import UIKit
 
 final class TrackerRecordStore {
     
-    private let context: NSManagedObjectContext
+    private let context: NSManagedObjectContext!
     
     convenience init() {
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
@@ -26,11 +26,12 @@ final class TrackerRecordStore {
         newRecord.isCompleted = isCompleted
         do {
             try context.save()
+            print("Successfully saved new record for tracker \(trackerRecord.trackerID)")
         } catch {
-            print("Failed to save context: \(error)")
+            print("Failed to save record: \(error)")
         }
     }
-    
+
     func fetchAllRecords() -> [TrackerRecord] {
         let fetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
         do {
