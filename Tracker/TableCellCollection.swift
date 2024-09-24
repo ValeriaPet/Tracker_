@@ -43,7 +43,7 @@ final class TableCellCollection: UITableViewCell {
     
     var colorNames: [UIColor] = []
     private var emojiList: [String] = []
-
+    
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super .init(style: style, reuseIdentifier: reuseIdentifier)
@@ -57,24 +57,24 @@ final class TableCellCollection: UITableViewCell {
     }
     
     func configure(new cell: MainTableCellParams, with selectedItem: Int?, emojiList: [String]) {
-            headerTitle = cell.title
-            cellHeight = cell.cellHeight
-            selectedCell = selectedItem
-            self.emojiList = emojiList // Сохраняем массив emoji в переменную
-            separatorInset = UIEdgeInsets(top: 0, left: self.bounds.midX, bottom: 0, right: self.bounds.midX)
-            
-            switch cell.id {
-            case .emoji:
-                collectionID = .emoji
-                collection.register(EmojiCollectionCell.self, forCellWithReuseIdentifier: CellReuseID.emoji.rawValue)
-            case .color:
-                collectionID = .color
-                collection.register(ColorCollectionCell.self, forCellWithReuseIdentifier: CellReuseID.color.rawValue)
-            default:
-                return
-            }
+        headerTitle = cell.title
+        cellHeight = cell.cellHeight
+        selectedCell = selectedItem
+        self.emojiList = emojiList // Сохраняем массив emoji в переменную
+        separatorInset = UIEdgeInsets(top: 0, left: self.bounds.midX, bottom: 0, right: self.bounds.midX)
+        
+        switch cell.id {
+        case .emoji:
+            collectionID = .emoji
+            collection.register(EmojiCollectionCell.self, forCellWithReuseIdentifier: CellReuseID.emoji.rawValue)
+        case .color:
+            collectionID = .color
+            collection.register(ColorCollectionCell.self, forCellWithReuseIdentifier: CellReuseID.color.rawValue)
+        default:
+            return
         }
-
+    }
+    
     
     @objc private func completeButtonAction() {}
     
@@ -106,14 +106,14 @@ final class TableCellCollection: UITableViewCell {
 
 // MARK: - UICollectionViewDataSource
 extension TableCellCollection: UICollectionViewDataSource {
-
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return 18
     }
-
+    
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cellIsSelected = selectedCell == indexPath.item
-
+        
         switch collectionID {
         case .emoji:
             if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CellReuseID.emoji.rawValue, for: indexPath) as? EmojiCollectionCell {
@@ -132,7 +132,7 @@ extension TableCellCollection: UICollectionViewDataSource {
         }
         fatalError("Проблема с подготовкой ячейки")
     }
-
+    
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         if let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "header", for: indexPath) as? CollectionCellHeader {

@@ -2,9 +2,8 @@ import Foundation
 
 struct TrackerData {
     static func getTrackerCategories() -> [TrackerCategory] {
-        _ = Calendar.current
         let today = Date()
-
+        
         let categories: [TrackerCategory] = [
             TrackerCategory(name: "Happy House", trackers: [
                 Tracker(id: UUID(),

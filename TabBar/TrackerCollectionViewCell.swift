@@ -10,7 +10,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     private let completionButton = UIButton()
     private let daysLabel = UILabel()
     weak var delegate: TrackerCollectionViewCellDelegate?
-
+    
     var tracker: Tracker? {
         didSet {
             guard let tracker = tracker else { return }
@@ -21,16 +21,16 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
             updateDaysCompleted()
         }
     }
-
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupViews()
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     private func setupViews() {
         contentView.layer.cornerRadius = 16
         contentView.clipsToBounds = true
@@ -82,12 +82,12 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
             completionButton.heightAnchor.constraint(equalToConstant: 34)
         ])
     }
-
+    
     func updateButtonAppearance() {
         guard let tracker = tracker else { return }
         updateCompletionButton(for: tracker)
     }
-
+    
     private func updateCompletionButton(for tracker: Tracker) {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
@@ -97,7 +97,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         } else {
             completionButton.isEnabled = true
         }
-
+        
         guard let isCompleted = delegate?.isTrackerCompletedToday(tracker) else { return }
         let originalColor = tracker.color
         
@@ -117,20 +117,20 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
             completionButton.setImage(plusImage, for: .normal)
         }
     }
-
+    
     func updateDaysCompleted() {
         guard let tracker = tracker, let totalCompletions = delegate?.totalCompletions(for: tracker) else { return }
         daysLabel.text = setStringFor(totalCompletions)
     }
-
+    
     @objc private func completionButtonTapped() {
         guard let tracker = tracker else { return }
-
+        
         let isCompleted = delegate?.isTrackerCompletedToday(tracker) ?? false
         delegate?.didCompleteTracker(self, tracker: tracker, isCompleted: !isCompleted)
     }
-
-
+    
+    
     private func setStringFor(_ count: Int) -> String {
         let days = count % 10
         switch days {

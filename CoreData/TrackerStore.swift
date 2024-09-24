@@ -1,19 +1,35 @@
 
 import Foundation
 import CoreData
-import UIKit
 
-final class TrackerStore {
+final class TrackerStore: NSObject, NSFetchedResultsControllerDelegate {
     
-    let context: NSManagedObjectContext!
+    let context: NSManagedObjectContext
     
-    convenience init() {
-        let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-        self.init(context: context)
+    private var fetchedResultsController: NSFetchedResultsController<TrackerCoreData>?
+    
+    init(context: NSManagedObjectContext = CoreDataHelper.shared.viewContext) {
+        self.context = context
     }
     
-    init(context: NSManagedObjectContext) {
-        self.context = context
+    private func setupFetchedResultsController() {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
+        
+        fetchedResultsController = NSFetchedResultsController(
+            fetchRequest: fetchRequest,
+            managedObjectContext: context,
+            sectionNameKeyPath: nil,
+            cacheName: nil
+        )
+        
+        fetchedResultsController?.delegate = self
+        
+        do {
+            try fetchedResultsController?.performFetch()
+        } catch {
+            print("Failed to fetch trackers: \(error)")
+        }
     }
     
     internal func addNewTracker(_ tracker: Tracker, to category: TrackerCategoryCoreData) throws {
@@ -29,12 +45,12 @@ final class TrackerStore {
         newTracker.creationDate = tracker.creationDate
         newTracker.category = category
 
+        // Сохранение расписания через трансформер
         let transformer = WeekdayValueTransformer()
         if let transformedSchedule = transformer.transformedValue(tracker.schedule) {
             newTracker.schedule = transformedSchedule as? NSObject
         }
 
-        newTracker.category = category
         category.addToTrackers(newTracker)
 
         do {
@@ -45,12 +61,12 @@ final class TrackerStore {
             throw error
         }
     }
+
 }
 
 
-
-
 extension TrackerStore {
+    
     private func decodingTracker(from trackerCoreData: TrackerCoreData) -> Tracker? {
         guard let id = trackerCoreData.id,
               let title = trackerCoreData.title,
@@ -58,10 +74,12 @@ extension TrackerStore {
               let emoji = trackerCoreData.emoji else { return nil }
 
         let color = UIColorTransform.color(from: colorHex)
-
-        guard let transformedSchedule = trackerCoreData.schedule as? Data else { return nil }
+        
         let transformer = WeekdayValueTransformer()
-        guard let schedule = transformer.reverseTransformedValue(transformedSchedule) as? [Weekday] else { return nil }
+        guard let transformedSchedule = trackerCoreData.schedule as? Data,
+              let schedule = transformer.reverseTransformedValue(transformedSchedule) as? [Weekday] else {
+            return Tracker(id: id, title: title, color: color, emoji: emoji, schedule: [], creationDate: trackerCoreData.creationDate ?? Date())
+        }
 
         return Tracker(id: id,
                        title: title,
@@ -70,8 +88,8 @@ extension TrackerStore {
                        schedule: schedule,
                        creationDate: trackerCoreData.creationDate ?? Date())
     }
-
-    internal func fetchTrackers() -> [Tracker] {
+    
+    func fetchTrackers() -> [Tracker] {
         let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
         do {
             let trackerCoreDataArray = try context.fetch(fetchRequest)
@@ -82,18 +100,6 @@ extension TrackerStore {
             return []
         }
     }
-    
-    
-    private func fetchTrackerCoreData(by id: UUID) -> TrackerCoreData? {
-        let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
-        fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
-        do {
-            let trackers = try context.fetch(fetchRequest)
-            return trackers.first
-        } catch {
-            print("Failed to fetch tracker by ID: \(error)")
-            return nil
-        }
-    }
 }
+
 

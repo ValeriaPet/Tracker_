@@ -4,28 +4,20 @@ import CoreData
 import UIKit
 
 protocol CategoryStoreDelegate: AnyObject {
-    func didUpdateData(in store: CategoryStore)
+    func didUpdateData(in store: TrackerCategoryStore)
 }
 
-final class CategoryStore: NSObject {
+final class TrackerCategoryStore: NSObject {
     
     private weak var delegate: CategoryStoreDelegate?
-    private let context: NSManagedObjectContext!
+    private let context: NSManagedObjectContext
     private let trackerStore: TrackerStore
     
-    convenience override init() {
-        let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-        self.init(context: context)
-    }
-    
-    init(context: NSManagedObjectContext) {
+    init(context: NSManagedObjectContext = CoreDataHelper.shared.viewContext) {
         self.context = context
         self.trackerStore = TrackerStore(context: context)
-        super.init()
     }
-}
-
-extension CategoryStore {
+    
     func addTrackerToCategory(_ tracker: Tracker, in category: TrackerCategoryCoreData) {
         do {
             try trackerStore.addNewTracker(tracker, to: category)
@@ -35,10 +27,7 @@ extension CategoryStore {
             print("Failed to add tracker to category: \(error)")
         }
     }
-}
-
-
-extension CategoryStore {
+    
     func createCategory(_ category: TrackerCategory) {
         guard let entity = NSEntityDescription.entity(forEntityName: "TrackerCategoryCoreData", in: context) else { return }
         let categoryEntity = TrackerCategoryCoreData(entity: entity, insertInto: context)
@@ -50,7 +39,7 @@ extension CategoryStore {
             print("Failed to save context: \(error)")
         }
     }
-
+    
     func fetchAllCategories() -> [TrackerCategory] {
         let fetchRequest = NSFetchRequest<TrackerCategoryCoreData>(entityName: "TrackerCategoryCoreData")
         do {
@@ -62,7 +51,7 @@ extension CategoryStore {
             return []
         }
     }
-
+    
     func createOrAddTrackerToCategory(_ tracker: Tracker, with titleCategory: String) {
         do {
             let category = fetchOrCreateCategory(with: titleCategory)
@@ -72,36 +61,36 @@ extension CategoryStore {
             print("Failed to add tracker to category: \(error)")
         }
     }
-
+    
 }
 
-extension CategoryStore {
+extension TrackerCategoryStore {
     
     private func decodingCategory(from trackerCategoryCoreData: TrackerCategoryCoreData) -> TrackerCategory? {
         guard let title = trackerCategoryCoreData.name else { return nil }
         guard let trackersCoreDataSet = trackerCategoryCoreData.trackers as? Set<TrackerCoreData> else { return nil }
-
+        
         let trackers = trackersCoreDataSet.compactMap { trackerCoreData in
             return decodingTracker(from: trackerCoreData)
         }
-
+        
         return TrackerCategory(name: title, trackers: trackers)
     }
-
- 
+    
+    
     private func decodingTracker(from trackerCoreData: TrackerCoreData) -> Tracker? {
         guard let id = trackerCoreData.id,
               let title = trackerCoreData.title,
               let colorHex = trackerCoreData.color,
               let emoji = trackerCoreData.emoji else { return nil }
-
+        
         let color = UIColorTransform.color(from: colorHex)
         let schedule = trackerCoreData.schedule as? [Weekday] ?? []
-
+        
         return Tracker(id: id, title: title, color: color, emoji: emoji, schedule: schedule, creationDate: Date())
     }
-
-
+    
+    
     private func fetchTrackerCoreData(by id: UUID) -> TrackerCoreData? {
         let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
         fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
@@ -113,8 +102,8 @@ extension CategoryStore {
             return nil
         }
     }
-
-
+    
+    
     func fetchOrCreateCategory(with title: String) -> TrackerCategoryCoreData {
         if let existingCategory = fetchCategory(with: title) {
             return existingCategory
@@ -122,7 +111,7 @@ extension CategoryStore {
             return createCategoryEntity(with: title)
         }
     }
-
+    
     private func fetchCategory(with title: String) -> TrackerCategoryCoreData? {
         let fetchRequest = NSFetchRequest<TrackerCategoryCoreData>(entityName: "TrackerCategoryCoreData")
         fetchRequest.predicate = NSPredicate(format: "name == %@", title)
@@ -134,7 +123,7 @@ extension CategoryStore {
             return nil
         }
     }
-
+    
     private func createCategoryEntity(with title: String) -> TrackerCategoryCoreData {
         let entity = NSEntityDescription.entity(forEntityName: "TrackerCategoryCoreData", in: context)!
         let newCategory = TrackerCategoryCoreData(entity: entity, insertInto: context)

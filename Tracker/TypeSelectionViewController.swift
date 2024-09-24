@@ -2,7 +2,7 @@ import Foundation
 import UIKit
 
 final class TypeSelectionViewController: UIViewController {
-
+    
     var onCreateTracker: ((TrackerCategory) -> Void)?
     
     override func viewDidLoad() {

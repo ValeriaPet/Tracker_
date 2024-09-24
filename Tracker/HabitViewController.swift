@@ -309,7 +309,7 @@ class HabitViewController: UIViewController, UITextFieldDelegate, UICollectionVi
         guard let selectedEmoji = selectedEmoji, let selectedColor = selectedColor else {
             return
         }
-
+        
         let emoji = emojiList[selectedEmoji]
         let color = colorNames[selectedColor]
         

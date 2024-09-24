@@ -234,7 +234,7 @@ class EventViewController: UIViewController, UITextFieldDelegate, UICollectionVi
         let emoji = emojiList[selectedEmoji]
         let color = colorNames[selectedColor]
         
-
+        
         // Устанавливаем текущую дату создания
         let newTracker = Tracker(
             id: UUID(),
@@ -243,19 +243,19 @@ class EventViewController: UIViewController, UITextFieldDelegate, UICollectionVi
             emoji: emoji,
             schedule: [],
             creationDate: Date())
-
+        
         let newCategory = TrackerCategory(name: selectedCategory, trackers: [newTracker])
-
+        
         onCreateTracker?(newCategory)
         dismiss(animated: true, completion: nil)
     }
-
+    
     
     private func updateCreateButtonState() {
-         let isFormValid = !nameTextField.text!.isEmpty && !selectedCategory.isEmpty && selectedEmoji != nil && selectedColor != nil
-         createButton.isEnabled = isFormValid
-         createButton.backgroundColor = isFormValid ? .black : .lightGray
-     }
+        let isFormValid = !nameTextField.text!.isEmpty && !selectedCategory.isEmpty && selectedEmoji != nil && selectedColor != nil
+        createButton.isEnabled = isFormValid
+        createButton.backgroundColor = isFormValid ? .black : .lightGray
+    }
     
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {

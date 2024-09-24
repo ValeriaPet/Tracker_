@@ -1,5 +1,4 @@
 import Foundation
-import CoreData
 
 @objc(WeekdayValueTransformer)
 final class WeekdayValueTransformer: ValueTransformer {
@@ -7,11 +6,10 @@ final class WeekdayValueTransformer: ValueTransformer {
     override class func transformedValueClass() -> AnyClass { NSData.self }
 
     override class func allowsReverseTransformation() -> Bool { true }
-        
 
     override func transformedValue(_ value: Any?) -> Any? {
         guard let weekdays = value as? [Weekday] else { return nil }
-        let ints = weekdays.map { $0.rawValue }  
+        let ints = weekdays.map { $0.rawValue }
         return try? NSKeyedArchiver.archivedData(withRootObject: ints, requiringSecureCoding: false)
     }
 
@@ -21,3 +19,4 @@ final class WeekdayValueTransformer: ValueTransformer {
         return ints.compactMap { Weekday(rawValue: $0) }
     }
 }
+

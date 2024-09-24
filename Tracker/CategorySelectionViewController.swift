@@ -6,10 +6,10 @@ final class CategorySelectionViewController: UIViewController, UITableViewDelega
     
     private var categories: [String] = ["Happy House", "Favorite things"]
     
- var onCategorySelected: ((String) -> Void)?
+    var onCategorySelected: ((String) -> Void)?
     
     private let tableView = UITableView()
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
