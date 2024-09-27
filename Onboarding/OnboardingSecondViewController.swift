@@ -23,6 +23,7 @@ final class OnboardingSecondViewController: UIViewController {
         return label
     }()
     
+    
     private  lazy var transitButton: UIButton = {
         let button = UIButton()
         button.backgroundColor = .black

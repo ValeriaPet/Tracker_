@@ -72,6 +72,7 @@ final class PageViewController: UIPageViewController, UIPageViewControllerDataSo
         return pages[nextIndex]
     }
     
+    
     // MARK: - UIPageViewControllerDelegate
     
     func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {

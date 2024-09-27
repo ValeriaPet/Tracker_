@@ -52,6 +52,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
         filterTrackers(by: currentDate)
     }
     
+    
     private func setupNavigationBar() {
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addTapped))
         self.navigationItem.title = "Трекеры"
