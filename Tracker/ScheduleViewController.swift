@@ -4,7 +4,7 @@ final class ScheduleViewController: UIViewController, UITableViewDelegate, UITab
     
     let daysOfWeek: [String] = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
     var selectedDays: [Bool] = Array(repeating: false, count: 7)
-
+    
     var onDaysSelected: (([String]) -> Void)?
     
     override func viewDidLoad() {
