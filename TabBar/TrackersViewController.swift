@@ -19,7 +19,9 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
     private var currentDate = Date()
     private var iconImageView = UIView()
     private var stubImageView = UIImageView()
+    private var notFoundImageView = UIImageView()
     private var imageLabel = UILabel()
+    private var notFoundImageLabel = UILabel()
     
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -45,6 +47,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
         setupCollectionView()
         setupDatePicker()
         setupIcon()
+        setupNotFoundView()
         loadTrackers()
         filterTrackers(by: currentDate)
     }
@@ -69,6 +72,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
         let storedRecords = trackerRecordStore.fetchAllRecords()
         completedTrackers = Set(storedRecords)
         
+        // Проверка на пустые категории
         if !storedCategories.isEmpty {
             categories = storedCategories
             filteredTrackerCategories = categories
@@ -78,7 +82,40 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
         } else {
             print("No categories or trackers found")
         }
+
+        // Обновление состояния заглушек (stub'ов)
+        updatePlaceholderState()
     }
+
+    // Метод для обновления состояния видимости элементов интерфейса
+    private func updatePlaceholderState() {
+        // Проверяем, пустые ли категории
+        let isCategoriesEmpty = categories.isEmpty
+        
+        if isCategoriesEmpty {
+            collectionView.isHidden = true
+            imageLabel.isHidden = false
+            stubImageView.isHidden = false
+        } else {
+            collectionView.isHidden = false
+            imageLabel.isHidden = true
+            stubImageView.isHidden = true
+            notFoundImageView.isHidden = true
+            notFoundImageLabel.isHidden = true
+        }
+    
+        // Если категории не пустые, но отфильтрованные трекеры пусты
+        if !isCategoriesEmpty && filteredTrackerCategories.isEmpty {
+            notFoundImageView.isHidden = false
+            notFoundImageLabel.isHidden = false
+            imageLabel.isHidden = true
+            stubImageView.isHidden = true
+        } else {
+            notFoundImageView.isHidden = true
+            notFoundImageLabel.isHidden = true
+        }
+    }
+
     
     func isTrackerCompletedToday(_ tracker: Tracker) -> Bool {
         return completedTrackers.contains { record in
@@ -320,6 +357,30 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
             imageLabel.centerXAnchor.constraint(equalTo: iconImageView.centerXAnchor)
         ])
     }
+
+    private func setupNotFoundView() {
+        // Добавляем изображение для "ничего не найдено"
+        let notFoundImage = UIImage(named: "notFoundImage")
+        notFoundImageView = UIImageView(image: notFoundImage)
+        notFoundImageView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(notFoundImageView)
+        
+        notFoundImageLabel.text = "Ничего нет"
+        notFoundImageLabel.font = .systemFont(ofSize: 12, weight: .medium)
+        notFoundImageLabel.numberOfLines = 2
+        notFoundImageLabel.textColor = .black
+        notFoundImageLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(notFoundImageLabel)
+        
+        NSLayoutConstraint.activate([
+            notFoundImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            notFoundImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            
+            notFoundImageLabel.centerXAnchor.constraint(equalTo: notFoundImageView.centerXAnchor),
+            notFoundImageLabel.topAnchor.constraint(equalTo: notFoundImageView.bottomAnchor, constant: 8)
+        ])
+    }
+
     
     private func setupCollectionView() {
         let layout = UICollectionViewFlowLayout()
