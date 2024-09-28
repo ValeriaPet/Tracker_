@@ -90,9 +90,9 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
 
     // Метод для обновления состояния видимости элементов интерфейса
     private func updatePlaceholderState() {
-        // Проверяем, пустые ли категории
+        // Если нет категорий, показываем заглушку
         let isCategoriesEmpty = categories.isEmpty
-        
+
         if isCategoriesEmpty {
             collectionView.isHidden = true
             imageLabel.isHidden = false
@@ -101,21 +101,18 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
             collectionView.isHidden = false
             imageLabel.isHidden = true
             stubImageView.isHidden = true
-            notFoundImageView.isHidden = true
-            notFoundImageLabel.isHidden = true
-        }
-    
-        // Если категории не пустые, но отфильтрованные трекеры пусты
-        if !isCategoriesEmpty && filteredTrackerCategories.isEmpty {
-            notFoundImageView.isHidden = false
-            notFoundImageLabel.isHidden = false
-            imageLabel.isHidden = true
-            stubImageView.isHidden = true
-        } else {
-            notFoundImageView.isHidden = true
-            notFoundImageLabel.isHidden = true
+
+            // Если категорий не пустые, но отфильтрованные трекеры пусты
+            if filteredTrackerCategories.isEmpty {
+                notFoundImageView.isHidden = false
+                notFoundImageLabel.isHidden = false
+            } else {
+                notFoundImageView.isHidden = true
+                notFoundImageLabel.isHidden = true
+            }
         }
     }
+
 
     
     func isTrackerCompletedToday(_ tracker: Tracker) -> Bool {

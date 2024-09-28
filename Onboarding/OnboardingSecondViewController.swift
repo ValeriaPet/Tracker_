@@ -74,7 +74,6 @@ final class OnboardingSecondViewController: UIViewController {
     }
     
     @objc private func transitButtonTapped() {
-        // Передаем действие на PageViewController
         pageViewController?.transitButtonTapped()
     }
 }

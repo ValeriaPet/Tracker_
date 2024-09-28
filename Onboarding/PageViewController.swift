@@ -20,7 +20,6 @@ final class PageViewController: UIPageViewController, UIPageViewControllerDataSo
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Установка ссылки на PageViewController в дочерних контроллерах
         onboardingFirstVC.pageViewController = self
         onboardingSecondVC.pageViewController = self
         

@@ -17,7 +17,7 @@ final class NewCategoryViewController: UIViewController {
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: textField.frame.height))
         textField.leftViewMode = .always
         textField.clearButtonMode = .whileEditing
-        textField.backgroundColor = .lightGray1
+        textField.backgroundColor = .backgroundDay
         textField.clipsToBounds = true
         textField.layer.cornerRadius = 16
         textField.delegate = self
@@ -81,6 +81,6 @@ extension NewCategoryViewController: UITextFieldDelegate {
         guard let text = textField.text else { return }
         let isFormValid = !text.isEmpty
         addButton.isEnabled = isFormValid
-        addButton.backgroundColor = isFormValid ? .black : .lightGray1
+        addButton.backgroundColor = isFormValid ? .black : .grayasset
     }
 }

@@ -11,7 +11,10 @@ final class CategorySelectionViewController: UIViewController {
     private var listTableView: UITableView = {
         let tableView = UITableView()
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
-        tableView.separatorStyle = .none
+        tableView.separatorStyle = .singleLine
+        tableView.separatorColor = .grayasset
+        tableView.separatorInset = .init(top: 0, left: 15, bottom: 0, right: 16)
+        tableView.backgroundColor = UIColor(white: 0.95, alpha: 1)
         tableView.layer.cornerRadius = 16
         tableView.layer.masksToBounds = true
         tableView.layer.maskedCorners = [.layerMaxXMaxYCorner,.layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner]
@@ -50,6 +53,16 @@ final class CategorySelectionViewController: UIViewController {
         button.addTarget(self, action: #selector(addCategoryButtonTapped), for: .touchUpInside)
         return button
     }()
+    
+    private var titleLabel: UILabel = {
+        let title = UILabel()
+        title.text = "Категории"
+        title.font = UIFont.systemFont(ofSize: 18, weight: .medium)
+        title.textAlignment = .center
+        title.translatesAutoresizingMaskIntoConstraints = false
+        return title
+    } ()
+
 
     //MARK: - Properties
     private var categoriesArray: [String] = []
@@ -67,19 +80,19 @@ final class CategorySelectionViewController: UIViewController {
         listTableView.dataSource = self
         listTableView.delegate = self
         setupUI()
-        createNavigationBar()
         setupConstraints()
         conditionStubs()
     }
 
     // MARK: - Private Functions
-    
-    
+
     private func setupUI() {
         view.addSubview(listTableView)
         view.addSubview(addCategoryButton)
         view.addSubview(stubImageView)
         view.addSubview(stubLabel)
+        view.addSubview(titleLabel)
+        
     }
 
     private func setupConstraints() {
@@ -97,16 +110,14 @@ final class CategorySelectionViewController: UIViewController {
             stubImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             stubImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -50),
             
+            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            
             stubLabel.topAnchor.constraint(equalTo: stubImageView.bottomAnchor, constant: 8),
             stubLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 80),
             stubLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -80),
             stubLabel.heightAnchor.constraint(equalToConstant: 36)
         ])
-    }
-    
-    private func createNavigationBar() {
-        guard let navigationBar = navigationController?.navigationBar else { return }
-        navigationBar.topItem?.title = "Категория"
     }
 
     private func conditionStubs() {
@@ -114,27 +125,13 @@ final class CategorySelectionViewController: UIViewController {
             listTableView.isHidden = true
             stubLabel.isHidden = false
             stubImageView.isHidden = false
+            titleLabel.isHidden = true
         } else {
             listTableView.isHidden = false
             stubLabel.isHidden = true
             stubImageView.isHidden = true
+            titleLabel.isHidden = false
         }
-    }
-    
-    private func createSeparatorImageView(cell: UITableViewCell) {
-        let separatorImageView = UIImageView()
-        separatorImageView.image = UIImage(named: "custom_separator")
-//        separatorImageView.tintColor = .gray
-        separatorImageView.tag = 100
-        separatorImageView.translatesAutoresizingMaskIntoConstraints = false
-        cell.addSubview(separatorImageView)
-        
-        NSLayoutConstraint.activate([
-            separatorImageView.leadingAnchor.constraint(equalTo: cell.leadingAnchor, constant: 16),
-            separatorImageView.trailingAnchor.constraint(equalTo: cell.trailingAnchor, constant: -16),
-            separatorImageView.bottomAnchor.constraint(equalTo: cell.bottomAnchor),
-            separatorImageView.heightAnchor.constraint(equalToConstant: 1)
-        ])
     }
 
     private func updateTableView() {
@@ -168,10 +165,13 @@ extension CategorySelectionViewController: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        cell.backgroundColor = .lightGray1
+        cell.backgroundColor = .clear
         cell.textLabel?.text = categoriesArray[indexPath.row]
         cell.accessoryView = nil
         
+        // Установка стиля выделения в none
+        cell.selectionStyle = .none
+
         if categoriesArray[indexPath.row] == selectedCategory {
             selectedIndexPath = indexPath
             let checkmarkImageView = UIImageView(image: UIImage(named: "Done"))
@@ -180,25 +180,32 @@ extension CategorySelectionViewController: UITableViewDataSource {
         
         return cell
     }
+
 }
 
 // MARK: - UITableViewDelegate
 extension CategorySelectionViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        // Если категория уже выбрана, убираем галочку
         if let selectedIndexPath = selectedIndexPath, selectedIndexPath == indexPath {
             tableView.cellForRow(at: indexPath)?.accessoryView = nil
             self.selectedIndexPath = nil
             self.selectedCategory = nil
         } else {
+            // Убираем галочку с предыдущей выбранной категории
             if let prevSelectedIndexPath = selectedIndexPath {
                 tableView.cellForRow(at: prevSelectedIndexPath)?.accessoryView = nil
             }
+
+            // Добавляем галочку к выбранной категории
             let checkmarkImageView = UIImageView(image: UIImage(named: "Done"))
             tableView.cellForRow(at: indexPath)?.accessoryView = checkmarkImageView
             selectedIndexPath = indexPath
             selectedCategory = categoriesArray[indexPath.row]
         }
     }
+
+
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return CGFloat(75)
