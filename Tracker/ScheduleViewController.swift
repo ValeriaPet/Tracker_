@@ -1,16 +1,14 @@
 import UIKit
 
-class ScheduleViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+final class ScheduleViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
-    let daysOfWeek = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
-    var selectedDays: [Bool] = Array(repeating: false, count: 7) 
+    let daysOfWeek: [String] = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
+    var selectedDays: [Bool] = Array(repeating: false, count: 7)
     
-    // Замыкание для передачи выбранных дней
     var onDaysSelected: (([String]) -> Void)?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         view.backgroundColor = .white
         setupUI()
     }
@@ -112,29 +110,21 @@ class ScheduleViewController: UIViewController, UITableViewDelegate, UITableView
         return cell
     }
     
-    @objc func switchChanged(_ sender: UISwitch) {
+    @objc private func switchChanged(_ sender: UISwitch) {
         selectedDays[sender.tag] = sender.isOn
     }
     
     // Функция для получения сокращенного названия дня
     func getShortName(for day: String) -> String {
         switch day {
-        case "Понедельник":
-            return "Пн"
-        case "Вторник":
-            return "Вт"
-        case "Среда":
-            return "Ср"
-        case "Четверг":
-            return "Чт"
-        case "Пятница":
-            return "Пт"
-        case "Суббота":
-            return "Сб"
-        case "Воскресенье":
-            return "Вс"
-        default:
-            return ""
+        case "Понедельник": return "Пн"
+        case "Вторник": return "Вт"
+        case "Среда": return "Ср"
+        case "Четверг": return "Чт"
+        case "Пятница": return "Пт"
+        case "Суббота": return "Сб"
+        case "Воскресенье": return "Вс"
+        default: return ""
         }
     }
 }
