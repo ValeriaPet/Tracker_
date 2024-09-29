@@ -1,7 +1,7 @@
 import UIKit
 
 
-class HabitViewController: UIViewController, UITextFieldDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+class HabitViewController: UIViewController, UITextFieldDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, CategorySelectionDelegate {
     
     let scrollView = UIScrollView()
     let contentView = UIView()
@@ -256,19 +256,20 @@ class HabitViewController: UIViewController, UITextFieldDelegate, UICollectionVi
         nameTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
     }
     
-    @objc func textFieldDidChange() {
+    @objc private func textFieldDidChange() {
         updateCreateButtonState()
     }
     
-    @objc func categoryButtonTapped() {
+    @objc private func categoryButtonTapped() {
         let categorySelectionVC = CategorySelectionViewController()
-        categorySelectionVC.onCategorySelected = { [weak self] selectedCategory in
-            self?.selectedCategory = selectedCategory
-            self?.categoryButton.setTitle("Категория: \(selectedCategory)", for: .normal)
-            self?.updateCreateButtonState()
-        }
-        categorySelectionVC.modalPresentationStyle = .pageSheet
+        categorySelectionVC.delegate = self  // Назначаем текущий контроллер делегатом
         present(categorySelectionVC, animated: true, completion: nil)
+    }
+    
+    func didSelectCategory(_ category: String) {
+        selectedCategory = category
+        categoryButton.setTitle("Категория: \(category)", for: .normal)
+        updateCreateButtonState()
     }
     
     @objc func scheduleButtonTapped() {

@@ -1,7 +1,7 @@
 import Foundation
 import UIKit
 
-class EventViewController: UIViewController, UITextFieldDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+class EventViewController: UIViewController, UITextFieldDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, CategorySelectionDelegate {
     
     let scrollView = UIScrollView()
     let contentView = UIView()
@@ -215,13 +215,16 @@ class EventViewController: UIViewController, UITextFieldDelegate, UICollectionVi
     
     @objc private func categoryButtonTapped() {
         let categorySelectionVC = CategorySelectionViewController()
-        categorySelectionVC.onCategorySelected = { [weak self] selectedCategory in
-            self?.selectedCategory = selectedCategory
-            self?.categoryButton.setTitle("Категория: \(selectedCategory)", for: .normal)
-            self?.updateCreateButtonState()
-        }
+        categorySelectionVC.delegate = self  // Назначаем текущий контроллер делегатом
         present(categorySelectionVC, animated: true, completion: nil)
     }
+    
+    func didSelectCategory(_ category: String) {
+        selectedCategory = category
+        categoryButton.setTitle("Категория: \(category)", for: .normal)
+        updateCreateButtonState()
+    }
+
     
     @objc private func cancelButtonTapped() {
         dismiss(animated: true, completion: nil)
